@@ -8,13 +8,22 @@
 
 支持从文档中识别资产、构建资产关系知识图谱，存入neo4j。
 
-包含项目管理、文档解析、资产识别、威胁风险分析、图表生成、报告中心、智能体服务、知识库服务、通知服务等模块。
+包含项目管理、文档解析、资产识别、威胁风险分析、图表生成、报告中心、智能体服务、知识库服务、通知服务等模块，支持按项目生成报告，每个项目支持生成不同版本的报告。
 
-OCR、多模态、语言、嵌入模型使用阿里云百炼平台 Qwen API 服务
+OCR、多模态、语言、嵌入模型使用阿里云百炼平台 Qwen API 服务。
 
+前端的设计风格请参考./docs/tara-ui.html。
+
+技术栈如下：
 前端: TypeScript, TailwindCSS, Vite
 后端： python（UV），FastAPI, SQLAlchemy, Pydantic, Uvicorn
 数据存储: MySQL 8.0, Redis 7, Neo4j 5, Milvus 2.3, ElasticSearch 8, MinIO
 消息队列: Kafka
 基础设施: Docker, Docker Compose, Nginx
 构建工具: Make
+开发与运行目标环境： x86_64 / Ubuntu 22+	
+
+按照这个想法，帮我生成详细的需求和设计，放在./specs/0001-spec.md 文件中, 输出为中文。
+
+
+## phase1

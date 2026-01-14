@@ -1,0 +1,2001 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TARA智能安全分析系统 - 完整版</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ==================== RESET & VARIABLES ==================== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --brand-blue: #3B82F6;
+            --brand-purple: #8B5CF6;
+            --brand-pink: #EC4899;
+            --brand-cyan: #06B6D4;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --info: #06B6D4;
+            --bg-primary: #0A0F1A;
+            --bg-secondary: #111827;
+            --bg-tertiary: #1E293B;
+            --bg-card: rgba(255,255,255,0.03);
+            --bg-card-hover: rgba(255,255,255,0.06);
+            --bg-hover: rgba(255,255,255,0.08);
+            --text-primary: #FFFFFF;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --text-disabled: #475569;
+            --border-color: rgba(255,255,255,0.06);
+            --border-light: rgba(255,255,255,0.1);
+            --border-focus: rgba(59,130,246,0.5);
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.25);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.3);
+            --shadow-glow: 0 0 20px rgba(59,130,246,0.3);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --radius-xl: 18px;
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.2s ease;
+            --transition-slow: 0.3s ease;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(145deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, #0F172A 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow: hidden;
+            font-size: 14px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ==================== SCROLLBAR ==================== */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+        /* ==================== ANIMATIONS ==================== */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        @keyframes glow { 0%, 100% { box-shadow: 0 0 20px rgba(59,130,246,0.3); } 50% { box-shadow: 0 0 40px rgba(59,130,246,0.5); } }
+        @keyframes countUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .animate-fadeIn { animation: fadeIn 0.4s ease-out forwards; }
+        .animate-fadeInUp { animation: fadeInUp 0.5s ease-out forwards; }
+        .animate-slideInRight { animation: slideInRight 0.4s ease-out forwards; }
+        .animate-pulse { animation: pulse 2s infinite; }
+        .animate-spin { animation: spin 1s linear infinite; }
+        .animate-bounce { animation: bounce 0.6s infinite; }
+        .animate-glow { animation: glow 2s ease-in-out infinite; }
+
+        /* ==================== LAYOUT ==================== */
+        .app-container { display: flex; height: 100vh; position: relative; }
+
+        /* Ambient Background */
+        .ambient-bg { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+        .ambient-bg .orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.6; }
+        .ambient-bg .orb-1 { top: -10%; left: 20%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%); }
+        .ambient-bg .orb-2 { bottom: -10%; right: 15%; width: 450px; height: 450px; background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%); }
+        .ambient-bg .orb-3 { top: 40%; left: 50%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%); transform: translateX(-50%); }
+
+        /* ==================== SIDEBAR ==================== */
+        .sidebar {
+            width: 260px;
+            display: flex;
+            flex-direction: column;
+            background: rgba(15,23,42,0.85);
+            backdrop-filter: blur(24px);
+            border-right: 1px solid var(--border-color);
+            position: relative;
+            z-index: 20;
+            transition: width var(--transition-slow);
+        }
+        .sidebar.collapsed { width: 76px; }
+
+        .sidebar-header {
+            height: 68px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .logo { display: flex; align-items: center; gap: 14px; }
+        .logo-icon {
+            width: 42px; height: 42px;
+            border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-purple) 100%);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+        }
+        .logo-icon svg { width: 22px; height: 22px; color: white; }
+        .logo-text { overflow: hidden; transition: opacity var(--transition-slow), width var(--transition-slow); }
+        .sidebar.collapsed .logo-text { opacity: 0; width: 0; }
+        .logo-title { font-weight: 700; font-size: 18px; color: var(--text-primary); letter-spacing: -0.3px; }
+        .logo-subtitle { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+        /* Navigation */
+        .nav-section { padding: 16px 12px; }
+        .nav-section-title {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-disabled);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 0 12px;
+            margin-bottom: 8px;
+        }
+        .sidebar.collapsed .nav-section-title { display: none; }
+
+        .nav-menu { flex: 1; padding: 8px 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+        .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 11px 14px; border-radius: var(--radius-md);
+            cursor: pointer; transition: all var(--transition-normal);
+            position: relative;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .nav-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(59,130,246,0.15) 0%, rgba(139,92,246,0.08) 100%);
+            color: var(--text-primary);
+        }
+        .nav-item.active::before {
+            content: '';
+            position: absolute; left: 0; top: 50%;
+            transform: translateY(-50%);
+            width: 3px; height: 22px;
+            background: linear-gradient(180deg, var(--brand-blue), var(--brand-purple));
+            border-radius: 0 3px 3px 0;
+        }
+        .nav-item svg { width: 20px; height: 20px; flex-shrink: 0; transition: color var(--transition-normal); }
+        .nav-item.active svg { color: var(--brand-blue); }
+        .nav-label { font-size: 14px; flex: 1; white-space: nowrap; }
+        .sidebar.collapsed .nav-label, .sidebar.collapsed .nav-badge { display: none; }
+        .nav-badge {
+            padding: 3px 8px; border-radius: 10px;
+            font-size: 11px; font-weight: 600;
+            background: rgba(59,130,246,0.2); color: #60A5FA;
+        }
+        .nav-badge.danger { background: rgba(239,68,68,0.2); color: #F87171; }
+        .nav-badge.success { background: rgba(16,185,129,0.2); color: #34D399; }
+        .nav-badge.new {
+            background: linear-gradient(135deg, var(--brand-purple), var(--brand-pink));
+            color: white;
+        }
+
+        /* Sidebar Footer */
+        .sidebar-footer { padding: 12px; border-top: 1px solid var(--border-color); }
+        .collapse-btn {
+            width: 100%; height: 40px;
+            border-radius: var(--radius-md);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: all var(--transition-normal);
+            font-size: 13px;
+        }
+        .collapse-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+        .collapse-btn svg { width: 16px; height: 16px; transition: transform var(--transition-slow); }
+        .sidebar.collapsed .collapse-btn svg { transform: rotate(180deg); }
+        .sidebar.collapsed .collapse-btn span { display: none; }
+
+        .user-card {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 12px; border-radius: var(--radius-md);
+            cursor: pointer; transition: background var(--transition-normal);
+            margin-top: 8px;
+        }
+        .user-card:hover { background: var(--bg-hover); }
+        .user-avatar {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: linear-gradient(135deg, #34D399, #06B6D4);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; font-weight: 600; color: white; flex-shrink: 0;
+        }
+        .user-info { overflow: hidden; }
+        .sidebar.collapsed .user-info { display: none; }
+        .user-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+        .user-role { font-size: 12px; color: var(--text-muted); }
+
+        /* ==================== MAIN CONTENT ==================== */
+        .main-content {
+            flex: 1; display: flex; flex-direction: column;
+            overflow: hidden; position: relative; z-index: 10;
+        }
+
+        /* Header */
+        .header {
+            height: 60px; display: flex;
+            align-items: center; justify-content: space-between;
+            padding: 0 28px;
+            background: rgba(15,23,42,0.6);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+        .breadcrumb-item { color: var(--text-muted); cursor: pointer; transition: color var(--transition-fast); }
+        .breadcrumb-item:hover { color: var(--text-primary); }
+        .breadcrumb-item.active { color: var(--text-primary); font-weight: 600; }
+        .breadcrumb-sep { color: var(--text-disabled); }
+        .breadcrumb-sep svg { width: 14px; height: 14px; }
+
+        .page-title { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .page-title-icon {
+            width: 32px; height: 32px; border-radius: var(--radius-md);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .page-title-icon svg { width: 18px; height: 18px; }
+
+        .header-actions { display: flex; align-items: center; gap: 12px; }
+        .search-box { position: relative; }
+        .search-box input {
+            width: 260px; height: 40px;
+            padding: 0 16px 0 42px; border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-primary); font-size: 14px;
+            outline: none; transition: all var(--transition-normal);
+        }
+        .search-box input::placeholder { color: var(--text-muted); }
+        .search-box input:focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+        .search-box svg {
+            position: absolute; left: 14px; top: 50%;
+            transform: translateY(-50%);
+            width: 16px; height: 16px; color: var(--text-muted);
+        }
+        .search-shortcut {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            padding: 3px 6px; border-radius: 4px;
+            background: var(--bg-hover); color: var(--text-disabled);
+            font-size: 11px; font-weight: 500;
+        }
+
+        .icon-btn {
+            width: 40px; height: 40px; border-radius: var(--radius-md);
+            border: 1px solid var(--border-color); background: var(--bg-card);
+            color: var(--text-secondary); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            position: relative; transition: all var(--transition-normal);
+        }
+        .icon-btn:hover { background: var(--bg-hover); color: var(--text-primary); border-color: var(--border-light); }
+        .icon-btn svg { width: 18px; height: 18px; }
+        .icon-btn .badge {
+            position: absolute; top: 8px; right: 8px;
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--danger);
+            border: 2px solid var(--bg-secondary);
+        }
+
+        /* Content Area */
+        .content-wrapper { flex: 1; display: flex; overflow: hidden; }
+        .content-area { flex: 1; padding: 28px; overflow-y: auto; }
+
+        /* ==================== CARDS & COMPONENTS ==================== */
+        .card {
+            padding: 24px; border-radius: var(--radius-xl);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            transition: all var(--transition-normal);
+        }
+        .card:hover { background: var(--bg-card-hover); }
+        .card-header {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 20px;
+        }
+        .card-title {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 16px; font-weight: 600;
+        }
+        .card-title-icon {
+            width: 36px; height: 36px; border-radius: var(--radius-md);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .card-title-icon svg { width: 18px; height: 18px; }
+        .card-title-icon.blue { background: rgba(59,130,246,0.15); color: #60A5FA; }
+        .card-title-icon.purple { background: rgba(139,92,246,0.15); color: #A78BFA; }
+        .card-title-icon.green { background: rgba(16,185,129,0.15); color: #34D399; }
+        .card-title-icon.orange { background: rgba(245,158,11,0.15); color: #FBBF24; }
+        .card-title-icon.red { background: rgba(239,68,68,0.15); color: #F87171; }
+        .card-title-icon.cyan { background: rgba(6,182,212,0.15); color: #22D3EE; }
+
+        .card-action {
+            font-size: 13px; color: var(--text-muted);
+            cursor: pointer; display: flex; align-items: center; gap: 4px;
+            transition: color var(--transition-fast);
+            padding: 6px 12px; border-radius: var(--radius-sm);
+        }
+        .card-action:hover { color: var(--text-primary); background: var(--bg-hover); }
+        .card-action svg { width: 14px; height: 14px; }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 10px 20px; border-radius: var(--radius-md);
+            font-size: 14px; font-weight: 500;
+            cursor: pointer; transition: all var(--transition-normal);
+            border: none; outline: none;
+        }
+        .btn svg { width: 16px; height: 16px; }
+        .btn:active { transform: scale(0.98); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-purple) 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+        }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(59,130,246,0.4); }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+        .btn-secondary:hover { background: var(--bg-hover); color: var(--text-primary); border-color: var(--border-light); }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+        }
+        .btn-success:hover { opacity: 0.9; }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-muted);
+            padding: 8px 12px;
+        }
+        .btn-ghost:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+        .btn-lg { padding: 14px 28px; font-size: 15px; border-radius: var(--radius-lg); }
+        .btn-sm { padding: 6px 12px; font-size: 13px; }
+        .btn-icon { width: 36px; height: 36px; padding: 0; }
+
+        /* ==================== DASHBOARD PAGE ==================== */
+        .dashboard { display: flex; flex-direction: column; gap: 28px; }
+
+        /* Welcome Banner */
+        .welcome-banner {
+            position: relative; padding: 32px 36px;
+            border-radius: var(--radius-xl); overflow: hidden;
+            background: linear-gradient(135deg, rgba(59,130,246,0.12) 0%, rgba(139,92,246,0.12) 100%);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .welcome-banner .glow {
+            position: absolute; top: -50%; right: -10%;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%);
+            filter: blur(60px);
+        }
+        .welcome-banner .pattern {
+            position: absolute; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .welcome-content { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: center; }
+        .welcome-text h2 { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+        .welcome-text h2 span { background: linear-gradient(135deg, #60A5FA, #A78BFA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .welcome-text p { font-size: 15px; color: var(--text-secondary); margin-bottom: 20px; }
+        .welcome-meta { display: flex; gap: 24px; }
+        .welcome-meta-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
+        .welcome-meta-item svg { width: 16px; height: 16px; color: var(--text-disabled); }
+        .welcome-actions { display: flex; gap: 12px; }
+
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .stat-card {
+            padding: 24px; border-radius: var(--radius-xl);
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            cursor: pointer; transition: all var(--transition-normal);
+            position: relative; overflow: hidden;
+        }
+        .stat-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0;
+            height: 3px; background: linear-gradient(90deg, var(--stat-color), transparent);
+            opacity: 0; transition: opacity var(--transition-normal);
+        }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+        .stat-card:hover::before { opacity: 1; }
+        .stat-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+        .stat-icon {
+            width: 52px; height: 52px; border-radius: var(--radius-lg);
+            display: flex; align-items: center; justify-content: center;
+            transition: transform var(--transition-normal);
+        }
+        .stat-card:hover .stat-icon { transform: scale(1.1); }
+        .stat-icon svg { width: 26px; height: 26px; }
+        .stat-icon.blue { background: rgba(59,130,246,0.12); color: #60A5FA; --stat-color: #3B82F6; }
+        .stat-icon.orange { background: rgba(245,158,11,0.12); color: #FBBF24; --stat-color: #F59E0B; }
+        .stat-icon.red { background: rgba(239,68,68,0.12); color: #F87171; --stat-color: #EF4444; }
+        .stat-icon.green { background: rgba(16,185,129,0.12); color: #34D399; --stat-color: #10B981; }
+        .stat-trend {
+            padding: 4px 10px; border-radius: 20px;
+            font-size: 12px; font-weight: 600;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .stat-trend svg { width: 14px; height: 14px; }
+        .stat-trend.up { background: rgba(16,185,129,0.12); color: #34D399; }
+        .stat-trend.down { background: rgba(239,68,68,0.12); color: #F87171; }
+        .stat-value { font-size: 36px; font-weight: 700; margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+        .stat-label { font-size: 14px; color: var(--text-muted); }
+
+        /* Main Grid */
+        .main-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; }
+        .main-grid-full { grid-column: 1 / -1; }
+
+        /* Project List */
+        .project-list { display: flex; flex-direction: column; gap: 12px; }
+        .project-item {
+            padding: 18px 20px; border-radius: var(--radius-lg);
+            background: rgba(255,255,255,0.02); border: 1px solid transparent;
+            cursor: pointer; transition: all var(--transition-normal);
+        }
+        .project-item:hover { background: var(--bg-hover); }
+        .project-item.selected {
+            background: rgba(59,130,246,0.08);
+            border-color: rgba(59,130,246,0.3);
+        }
+        .project-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+        .project-info { display: flex; align-items: center; gap: 14px; }
+        .project-icon {
+            width: 44px; height: 44px; border-radius: var(--radius-md);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .project-icon svg { width: 22px; height: 22px; }
+        .project-icon.blue { background: rgba(59,130,246,0.15); color: #60A5FA; }
+        .project-icon.purple { background: rgba(139,92,246,0.15); color: #A78BFA; }
+        .project-icon.cyan { background: rgba(6,182,212,0.15); color: #22D3EE; }
+        .project-name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+        .project-meta { display: flex; gap: 16px; font-size: 12px; color: var(--text-muted); }
+        .project-meta span { display: flex; align-items: center; gap: 5px; }
+        .project-meta svg { width: 13px; height: 13px; }
+        .status-badge {
+            padding: 5px 12px; border-radius: 20px;
+            font-size: 12px; font-weight: 500;
+        }
+        .status-badge.active { background: rgba(16,185,129,0.12); color: #34D399; }
+        .status-badge.review { background: rgba(245,158,11,0.12); color: #FBBF24; }
+        .status-badge.draft { background: rgba(148,163,184,0.12); color: #94A3B8; }
+        .progress-bar { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+        .progress-track { flex: 1; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.08); overflow: hidden; }
+        .progress-fill {
+            height: 100%; border-radius: 3px;
+            background: linear-gradient(90deg, var(--brand-blue), var(--brand-purple));
+            transition: width 0.8s ease;
+        }
+        .progress-text { font-size: 14px; font-weight: 600; color: var(--text-secondary); min-width: 40px; text-align: right; }
+        .project-footer { display: flex; align-items: center; font-size: 12px; color: var(--text-muted); }
+        .project-footer svg { width: 13px; height: 13px; margin-right: 5px; }
+
+        /* Activity List */
+        .activity-list { display: flex; flex-direction: column; gap: 4px; }
+        .activity-item {
+            display: flex; gap: 14px;
+            padding: 14px; border-radius: var(--radius-md);
+            cursor: pointer; transition: background var(--transition-fast);
+        }
+        .activity-item:hover { background: var(--bg-hover); }
+        .activity-icon {
+            width: 36px; height: 36px; border-radius: var(--radius-md);
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .activity-icon svg { width: 16px; height: 16px; }
+        .activity-icon.threat { background: rgba(245,158,11,0.12); color: #FBBF24; }
+        .activity-icon.measure { background: rgba(16,185,129,0.12); color: #34D399; }
+        .activity-icon.risk { background: rgba(239,68,68,0.12); color: #F87171; }
+        .activity-icon.asset { background: rgba(59,130,246,0.12); color: #60A5FA; }
+        .activity-icon.report { background: rgba(139,92,246,0.12); color: #A78BFA; }
+        .activity-content { flex: 1; min-width: 0; }
+        .activity-action { font-size: 14px; color: var(--text-secondary); margin-bottom: 2px; }
+        .activity-target { font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .activity-time { font-size: 11px; color: var(--text-disabled); margin-top: 4px; }
+
+        /* Charts Grid */
+        .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+        /* Risk Heatmap */
+        .heatmap-container { display: flex; gap: 16px; }
+        .heatmap-labels { display: flex; flex-direction: column; justify-content: space-between; padding: 4px 0; }
+        .heatmap-labels span { height: 40px; display: flex; align-items: center; font-size: 12px; color: var(--text-muted); }
+        .heatmap-grid { flex: 1; }
+        .heatmap-cells { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 8px; }
+        .heatmap-cell {
+            height: 40px; border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 600; color: white;
+            cursor: pointer; transition: all var(--transition-fast);
+        }
+        .heatmap-cell:hover { transform: scale(1.08); z-index: 1; }
+        .heatmap-cell.level-0 { background: rgba(30,41,59,0.6); color: transparent; }
+        .heatmap-cell.level-1 { background: rgba(16,185,129,0.5); }
+        .heatmap-cell.level-2 { background: rgba(245,158,11,0.6); }
+        .heatmap-cell.level-3 { background: rgba(239,68,68,0.7); }
+        .heatmap-cell.level-4 { background: rgba(185,28,28,0.85); }
+        .heatmap-x-labels { display: flex; justify-content: space-between; padding: 0 4px; }
+        .heatmap-x-labels span { font-size: 12px; color: var(--text-muted); }
+        .heatmap-legend { display: flex; justify-content: center; gap: 20px; margin-top: 16px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); }
+        .legend-dot { width: 14px; height: 14px; border-radius: var(--radius-sm); }
+
+        /* STRIDE Chart */
+        .stride-list { display: flex; flex-direction: column; gap: 14px; }
+        .stride-item { display: flex; align-items: center; gap: 14px; cursor: pointer; }
+        .stride-item:hover .stride-label { color: var(--text-primary); }
+        .stride-label { width: 90px; font-size: 13px; color: var(--text-secondary); font-weight: 500; transition: color var(--transition-fast); }
+        .stride-bar-container { flex: 1; height: 28px; border-radius: var(--radius-sm); background: rgba(255,255,255,0.04); overflow: hidden; }
+        .stride-bar {
+            height: 100%; border-radius: var(--radius-sm);
+            display: flex; align-items: center; padding-left: 12px;
+            font-size: 12px; font-weight: 600; color: white;
+            transition: all 0.6s ease;
+        }
+        .stride-item:hover .stride-bar { filter: brightness(1.1); }
+        .stride-percent { width: 50px; text-align: right; font-size: 13px; color: var(--text-muted); font-weight: 500; }
+
+        /* ==================== REPORT GENERATOR PAGE ==================== */
+        .report-generator { display: flex; flex-direction: column; gap: 28px; }
+
+        /* Hero Section */
+        .hero-section {
+            position: relative; padding: 36px 40px;
+            border-radius: var(--radius-xl); overflow: hidden;
+            background: linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(139,92,246,0.1) 50%, rgba(236,72,153,0.08) 100%);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .hero-section .glow-1 {
+            position: absolute; top: -80%; right: 0%;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(139,92,246,0.25) 0%, transparent 60%);
+            filter: blur(80px);
+        }
+        .hero-section .glow-2 {
+            position: absolute; bottom: -60%; left: 10%;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(59,130,246,0.2) 0%, transparent 60%);
+            filter: blur(60px);
+        }
+        .hero-content { position: relative; z-index: 1; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px; border-radius: 20px;
+            background: linear-gradient(135deg, var(--brand-purple), var(--brand-pink));
+            font-size: 12px; font-weight: 600; color: white;
+            margin-bottom: 16px;
+        }
+        .hero-badge svg { width: 14px; height: 14px; }
+        .hero-title { font-size: 32px; font-weight: 700; margin-bottom: 12px; line-height: 1.3; }
+        .hero-title span { background: linear-gradient(135deg, #60A5FA, #A78BFA, #F472B6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-subtitle { font-size: 16px; color: var(--text-secondary); margin-bottom: 28px; max-width: 600px; line-height: 1.6; }
+        .hero-features { display: flex; gap: 28px; flex-wrap: wrap; }
+        .hero-feature { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--text-secondary); }
+        .hero-feature-icon {
+            width: 24px; height: 24px; border-radius: 6px;
+            background: rgba(16,185,129,0.15);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .hero-feature-icon svg { width: 14px; height: 14px; color: #34D399; }
+
+        /* Steps Indicator */
+        .steps-indicator {
+            display: flex; justify-content: center; align-items: center;
+            gap: 0; padding: 24px 32px;
+            background: var(--bg-card); border-radius: var(--radius-xl);
+            border: 1px solid var(--border-color);
+        }
+        .step-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px 24px; border-radius: var(--radius-lg);
+            transition: all var(--transition-normal);
+        }
+        .step-item.active { background: rgba(59,130,246,0.1); }
+        .step-item.completed { background: rgba(16,185,129,0.08); }
+        .step-number {
+            width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 700;
+            background: var(--bg-hover); color: var(--text-muted);
+            transition: all var(--transition-normal);
+        }
+        .step-item.active .step-number { background: var(--brand-blue); color: white; box-shadow: 0 4px 12px rgba(59,130,246,0.4); }
+        .step-item.completed .step-number { background: var(--success); color: white; }
+        .step-item.completed .step-number svg { width: 18px; height: 18px; }
+        .step-info { display: flex; flex-direction: column; gap: 2px; }
+        .step-label { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+        .step-desc { font-size: 12px; color: var(--text-muted); }
+        .step-connector { width: 60px; height: 2px; background: var(--border-color); }
+        .step-connector.active { background: linear-gradient(90deg, var(--brand-blue), var(--brand-purple)); }
+        .step-connector.completed { background: var(--success); }
+
+        /* Generator Grid */
+        .generator-grid { display: grid; grid-template-columns: 1fr 380px; gap: 24px; }
+        .generator-main { display: flex; flex-direction: column; gap: 24px; }
+        .generator-sidebar { display: flex; flex-direction: column; gap: 24px; }
+
+        /* Upload Zone */
+        .upload-zone {
+            border: 2px dashed var(--border-light);
+            border-radius: var(--radius-xl); padding: 48px 32px;
+            text-align: center; cursor: pointer;
+            transition: all var(--transition-normal);
+            background: rgba(255,255,255,0.01);
+            position: relative; overflow: hidden;
+        }
+        .upload-zone::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(59,130,246,0.03), rgba(139,92,246,0.03));
+            opacity: 0; transition: opacity var(--transition-normal);
+        }
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--brand-blue);
+            background: rgba(59,130,246,0.04);
+        }
+        .upload-zone:hover::before, .upload-zone.dragover::before { opacity: 1; }
+        .upload-zone.has-files { border-style: solid; border-color: var(--success); }
+        .upload-icon {
+            width: 72px; height: 72px; margin: 0 auto 20px;
+            border-radius: var(--radius-xl);
+            background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(139,92,246,0.12));
+            display: flex; align-items: center; justify-content: center;
+            position: relative; z-index: 1;
+        }
+        .upload-icon svg { width: 36px; height: 36px; color: var(--brand-blue); }
+        .upload-title { font-size: 17px; font-weight: 600; margin-bottom: 8px; position: relative; z-index: 1; }
+        .upload-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; position: relative; z-index: 1; }
+        .upload-formats { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; position: relative; z-index: 1; }
+        .format-tag {
+            padding: 6px 14px; border-radius: 20px;
+            font-size: 12px; font-weight: 500;
+            background: var(--bg-hover); color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        /* File List */
+        .file-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+        .file-item {
+            display: flex; align-items: center; gap: 14px;
+            padding: 14px 18px; border-radius: var(--radius-lg);
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            transition: all var(--transition-normal);
+        }
+        .file-item:hover { background: var(--bg-hover); }
+        .file-icon {
+            width: 44px; height: 44px; border-radius: var(--radius-md);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .file-icon svg { width: 22px; height: 22px; }
+        .file-icon.excel { background: rgba(16,185,129,0.12); color: #34D399; }
+        .file-icon.csv { background: rgba(59,130,246,0.12); color: #60A5FA; }
+        .file-icon.pdf { background: rgba(239,68,68,0.12); color: #F87171; }
+        .file-icon.json { background: rgba(245,158,11,0.12); color: #FBBF24; }
+        .file-info { flex: 1; min-width: 0; }
+        .file-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .file-meta { display: flex; gap: 16px; font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+        .file-status { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; }
+        .file-status svg { width: 16px; height: 16px; }
+        .file-status.success { color: var(--success); }
+        .file-status.processing { color: var(--warning); }
+        .file-remove {
+            width: 34px; height: 34px; border-radius: var(--radius-md);
+            border: none; background: transparent;
+            color: var(--text-muted); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all var(--transition-fast);
+        }
+        .file-remove:hover { background: rgba(239,68,68,0.1); color: var(--danger); }
+        .file-remove svg { width: 16px; height: 16px; }
+
+        /* Template Grid */
+        .template-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .template-btn {
+            padding: 18px; border-radius: var(--radius-lg);
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            cursor: pointer; text-align: left;
+            transition: all var(--transition-normal);
+        }
+        .template-btn:hover { background: var(--bg-hover); border-color: var(--border-light); }
+        .template-btn.selected { background: rgba(59,130,246,0.08); border-color: var(--brand-blue); }
+        .template-icon {
+            width: 40px; height: 40px; border-radius: var(--radius-md);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 14px;
+        }
+        .template-icon svg { width: 20px; height: 20px; }
+        .template-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+        .template-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+        /* Prompt Input */
+        .prompt-container {
+            background: var(--bg-card); border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color); overflow: hidden;
+        }
+        .prompt-container textarea {
+            width: 100%; padding: 18px 20px;
+            border: none; background: transparent;
+            color: var(--text-primary); font-size: 14px;
+            font-family: inherit; resize: none; outline: none;
+            min-height: 140px; line-height: 1.6;
+        }
+        .prompt-container textarea::placeholder { color: var(--text-muted); }
+        .prompt-toolbar {
+            display: flex; justify-content: space-between;
+            align-items: center; padding: 12px 16px;
+            border-top: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.01);
+        }
+        .char-count { font-size: 12px; color: var(--text-muted); }
+
+        /* Generate Button */
+        .generate-section {
+            display: flex; justify-content: center;
+            padding: 32px; background: var(--bg-card);
+            border-radius: var(--radius-xl); border: 1px solid var(--border-color);
+        }
+        .generate-btn {
+            padding: 18px 56px; border-radius: var(--radius-xl); border: none;
+            background: linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-purple) 100%);
+            color: white; font-size: 17px; font-weight: 600;
+            cursor: pointer; display: flex; align-items: center; gap: 14px;
+            transition: all var(--transition-normal);
+            box-shadow: 0 8px 32px rgba(59,130,246,0.35);
+        }
+        .generate-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(59,130,246,0.45); }
+        .generate-btn:active { transform: translateY(-1px); }
+        .generate-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+        .generate-btn svg { width: 24px; height: 24px; }
+        .generate-btn.generating { animation: pulse 1.5s infinite; }
+
+        /* Preview Card */
+        .preview-card { background: var(--bg-card); border-radius: var(--radius-xl); border: 1px solid var(--border-color); overflow: hidden; }
+        .preview-header { padding: 18px 20px; border-bottom: 1px solid var(--border-color); }
+        .preview-header h4 { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .preview-header h4 svg { width: 18px; height: 18px; color: var(--brand-purple); }
+        .preview-content { padding: 20px; }
+        .preview-empty { text-align: center; padding: 32px 20px; color: var(--text-muted); font-size: 14px; }
+        .preview-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .preview-stat {
+            padding: 16px; background: var(--bg-hover); border-radius: var(--radius-md);
+            text-align: center;
+        }
+        .preview-stat-value { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+        .preview-stat-label { font-size: 12px; color: var(--text-muted); }
+        .preview-stat.blue .preview-stat-value { color: #60A5FA; }
+        .preview-stat.orange .preview-stat-value { color: #FBBF24; }
+        .preview-info { font-size: 13px; color: var(--text-muted); text-align: center; padding-top: 12px; border-top: 1px solid var(--border-color); }
+
+        /* Tips Card */
+        .tips-card { background: var(--bg-card); border-radius: var(--radius-xl); border: 1px solid var(--border-color); overflow: hidden; }
+        .tips-header { padding: 18px 20px; border-bottom: 1px solid var(--border-color); }
+        .tips-header h4 { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .tips-header h4 svg { width: 18px; height: 18px; color: var(--success); }
+        .tips-content { padding: 20px; font-size: 13px; color: var(--text-secondary); line-height: 1.8; }
+        .tips-content p { margin-bottom: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .tips-content ul { margin-left: 24px; margin-bottom: 16px; }
+        .tips-content li { margin-bottom: 6px; color: var(--text-muted); }
+
+        /* ==================== AI PANEL ==================== */
+        .ai-panel {
+            width: 420px; display: flex; flex-direction: column;
+            background: rgba(15,23,42,0.85); backdrop-filter: blur(24px);
+            border-left: 1px solid var(--border-color);
+            transition: width var(--transition-slow), opacity var(--transition-slow);
+            position: relative; z-index: 15;
+        }
+        .ai-panel.hidden { width: 0; opacity: 0; overflow: hidden; }
+
+        .ai-header {
+            height: 60px; display: flex;
+            align-items: center; justify-content: space-between;
+            padding: 0 20px; border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .ai-info { display: flex; align-items: center; gap: 14px; }
+        .ai-avatar {
+            width: 40px; height: 40px; border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, var(--brand-purple) 0%, var(--brand-pink) 100%);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 12px rgba(139,92,246,0.3);
+        }
+        .ai-avatar svg { width: 22px; height: 22px; color: white; }
+        .ai-title { font-size: 15px; font-weight: 600; }
+        .ai-status { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); }
+        .ai-status .dot { width: 8px; height: 8px; border-radius: 50%; background: #34D399; animation: pulse 2s infinite; }
+        .ai-header-actions { display: flex; gap: 6px; }
+
+        /* AI Mode Tabs */
+        .ai-mode-tabs {
+            display: flex; padding: 14px 16px; gap: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .mode-tab {
+            flex: 1; padding: 10px 16px; border-radius: var(--radius-md);
+            border: none; background: transparent;
+            color: var(--text-muted); font-size: 13px; font-weight: 500;
+            cursor: pointer; transition: all var(--transition-normal);
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .mode-tab:hover { background: var(--bg-hover); color: var(--text-primary); }
+        .mode-tab.active { background: rgba(59,130,246,0.12); color: var(--brand-blue); }
+        .mode-tab svg { width: 16px; height: 16px; }
+
+        /* AI Quick Actions */
+        .ai-quick-actions { padding: 14px 16px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
+        .quick-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .quick-action-btn {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px; border-radius: var(--radius-md);
+            background: var(--bg-card); border: 1px solid var(--border-color);
+            cursor: pointer; transition: all var(--transition-normal); text-align: left;
+        }
+        .quick-action-btn:hover { background: var(--bg-hover); transform: translateY(-2px); }
+        .quick-action-btn:active { transform: translateY(0); }
+        .quick-action-icon {
+            width: 40px; height: 40px; border-radius: var(--radius-md);
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .quick-action-icon svg { width: 18px; height: 18px; }
+        .quick-action-label { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+        .quick-action-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+        /* AI Messages */
+        .ai-messages {
+            flex: 1; padding: 20px; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 20px;
+        }
+        .message { max-width: 92%; }
+        .message.user { align-self: flex-end; }
+        .message.assistant { align-self: flex-start; }
+        .message-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .message-avatar {
+            width: 28px; height: 28px; border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--brand-purple), var(--brand-pink));
+            display: flex; align-items: center; justify-content: center;
+        }
+        .message-avatar svg { width: 14px; height: 14px; color: white; }
+        .message-time { font-size: 12px; color: var(--text-muted); }
+        .message-bubble {
+            padding: 14px 18px; border-radius: var(--radius-lg);
+            font-size: 14px; line-height: 1.7;
+        }
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, var(--brand-blue), #2563EB);
+            color: white; border-bottom-right-radius: 4px;
+        }
+        .message.assistant .message-bubble {
+            background: var(--bg-hover); border: 1px solid var(--border-color);
+            color: var(--text-secondary); border-bottom-left-radius: 4px;
+        }
+        .message-sources { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+        .message-sources span { font-size: 11px; color: var(--text-disabled); }
+        .source-tag {
+            padding: 3px 10px; border-radius: 12px; font-size: 11px;
+            background: var(--bg-hover); color: var(--text-muted);
+            cursor: pointer; transition: all var(--transition-fast);
+        }
+        .source-tag:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); }
+        .user-time { text-align: right; font-size: 11px; color: var(--text-disabled); margin-top: 6px; }
+
+        /* Typing Indicator */
+        .typing-indicator { display: flex; align-items: flex-start; gap: 10px; }
+        .typing-dots {
+            display: flex; gap: 6px; padding: 14px 18px;
+            background: var(--bg-hover); border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg); border-bottom-left-radius: 4px;
+        }
+        .typing-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); animation: bounce 0.6s infinite; }
+        .typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+        /* AI Input */
+        .ai-input { padding: 16px; border-top: 1px solid var(--border-color); flex-shrink: 0; }
+        .input-container {
+            border-radius: var(--radius-lg); background: var(--bg-card);
+            border: 1px solid var(--border-color); overflow: hidden;
+            transition: border-color var(--transition-fast);
+        }
+        .input-container:focus-within { border-color: var(--border-focus); }
+        .input-container textarea {
+            width: 100%; padding: 14px 16px;
+            border: none; background: transparent;
+            color: var(--text-primary); font-size: 14px;
+            font-family: inherit; resize: none; outline: none;
+        }
+        .input-container textarea::placeholder { color: var(--text-muted); }
+        .input-toolbar {
+            display: flex; justify-content: space-between;
+            align-items: center; padding: 10px 14px;
+            border-top: 1px solid var(--border-color);
+        }
+        .input-tools { display: flex; gap: 4px; }
+        .tool-btn {
+            width: 34px; height: 34px; border-radius: var(--radius-sm);
+            border: none; background: transparent;
+            color: var(--text-muted); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all var(--transition-fast);
+        }
+        .tool-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+        .tool-btn svg { width: 16px; height: 16px; }
+        .send-btn {
+            padding: 8px 18px; border-radius: var(--radius-md); border: none;
+            background: linear-gradient(135deg, var(--brand-blue), var(--brand-purple));
+            color: white; font-size: 14px; font-weight: 500;
+            cursor: pointer; display: flex; align-items: center; gap: 8px;
+            transition: all var(--transition-normal);
+        }
+        .send-btn:hover { opacity: 0.9; transform: scale(1.02); }
+        .send-btn:active { transform: scale(0.98); }
+        .send-btn svg { width: 16px; height: 16px; }
+        .input-hint {
+            display: flex; justify-content: space-between;
+            margin-top: 10px; padding: 0 4px;
+            font-size: 11px; color: var(--text-disabled);
+        }
+        .input-hint span { display: flex; align-items: center; gap: 5px; }
+        .input-hint svg { width: 12px; height: 12px; }
+
+        /* ==================== HIDDEN ELEMENTS ==================== */
+        .page-content { display: none; }
+        .page-content.active { display: block; }
+
+        /* ==================== RESPONSIVE ==================== */
+        @media (max-width: 1400px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .main-grid { grid-template-columns: 1fr; }
+            .charts-grid { grid-template-columns: 1fr; }
+            .generator-grid { grid-template-columns: 1fr; }
+            .generator-sidebar { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Ambient Background -->
+        <div class="ambient-bg">
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
+            <div class="orb orb-3"></div>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <div class="logo-text">
+                        <div class="logo-title">TARA Pro</div>
+                        <div class="logo-subtitle">智能安全分析</div>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <div class="nav-section-title">主要功能</div>
+                <a class="nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
+                    <span class="nav-label">工作台</span>
+                </a>
+                <a class="nav-item" data-tab="generator" onclick="switchTab('generator')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg>
+                    <span class="nav-label">一键生成报告</span>
+                    <span class="nav-badge new">AI</span>
+                </a>
+
+                <div class="nav-section-title" style="margin-top: 16px;">分析模块</div>
+                <a class="nav-item" data-tab="projects" onclick="switchTab('projects')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+                    <span class="nav-label">项目管理</span>
+                    <span class="nav-badge">3</span>
+                </a>
+                <a class="nav-item" data-tab="assets" onclick="switchTab('assets')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></svg>
+                    <span class="nav-label">资产识别</span>
+                    <span class="nav-badge">48</span>
+                </a>
+                <a class="nav-item" data-tab="threats" onclick="switchTab('threats')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+                    <span class="nav-label">威胁分析</span>
+                    <span class="nav-badge danger">127</span>
+                </a>
+                <a class="nav-item" data-tab="risks" onclick="switchTab('risks')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    <span class="nav-label">风险评估</span>
+                    <span class="nav-badge danger">23</span>
+                </a>
+                <a class="nav-item" data-tab="measures" onclick="switchTab('measures')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span class="nav-label">安全措施</span>
+                    <span class="nav-badge success">89</span>
+                </a>
+
+                <div class="nav-section-title" style="margin-top: 16px;">输出</div>
+                <a class="nav-item" data-tab="reports" onclick="switchTab('reports')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+                    <span class="nav-label">报告中心</span>
+                    <span class="nav-badge">2</span>
+                </a>
+                <a class="nav-item" data-tab="knowledge" onclick="switchTab('knowledge')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                    <span class="nav-label">知识库</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="collapse-btn" onclick="toggleSidebar()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 18l-6-6 6-6"/></svg>
+                    <span>收起菜单</span>
+                </button>
+                <div class="user-card">
+                    <div class="user-avatar">张</div>
+                    <div class="user-info">
+                        <div class="user-name">张工程师</div>
+                        <div class="user-role">高级安全分析师</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <div class="page-title" id="page-title">
+                        <div class="page-title-icon" style="background: rgba(59,130,246,0.15); color: #60A5FA;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
+                        </div>
+                        <span>工作台</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="search-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                        <input type="text" placeholder="搜索资产、威胁、报告...">
+                        <span class="search-shortcut">⌘K</span>
+                    </div>
+                    <button class="icon-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+                        <span class="badge"></span>
+                    </button>
+                    <button class="icon-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Content Wrapper -->
+            <div class="content-wrapper">
+                <!-- Content Area -->
+                <div class="content-area">
+                    <!-- Dashboard Page -->
+                    <div class="page-content active" id="dashboard-page">
+                        <div class="dashboard animate-fadeIn">
+                            <!-- Welcome Banner -->
+                            <div class="welcome-banner">
+                                <div class="glow"></div>
+                                <div class="pattern"></div>
+                                <div class="welcome-content">
+                                    <div class="welcome-text">
+                                        <h2>欢迎回来，<span>张工程师</span> 👋</h2>
+                                        <p>您有 3 个项目正在进行中，23 个高风险威胁待处理</p>
+                                        <div class="welcome-meta">
+                                            <div class="welcome-meta-item">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+                                                当前项目：MY25 EV平台
+                                            </div>
+                                            <div class="welcome-meta-item">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                                                上次保存：10分钟前
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="welcome-actions">
+                                        <button class="btn btn-primary">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3l14 9-14 9V3z"/></svg>
+                                            继续分析
+                                        </button>
+                                        <button class="btn btn-secondary">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+                                            查看报告
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Stats Grid -->
+                            <div class="stats-grid">
+                                <div class="stat-card" style="--stat-color: #3B82F6;">
+                                    <div class="stat-header">
+                                        <div class="stat-icon blue">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/></svg>
+                                        </div>
+                                        <div class="stat-trend up">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 6l-9.5 9.5-5-5L1 18"/></svg>
+                                            +5
+                                        </div>
+                                    </div>
+                                    <div class="stat-value">48</div>
+                                    <div class="stat-label">已识别资产</div>
+                                </div>
+                                <div class="stat-card" style="--stat-color: #F59E0B;">
+                                    <div class="stat-header">
+                                        <div class="stat-icon orange">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                                        </div>
+                                        <div class="stat-trend up">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 6l-9.5 9.5-5-5L1 18"/></svg>
+                                            +12
+                                        </div>
+                                    </div>
+                                    <div class="stat-value">127</div>
+                                    <div class="stat-label">威胁场景</div>
+                                </div>
+                                <div class="stat-card" style="--stat-color: #EF4444;">
+                                    <div class="stat-header">
+                                        <div class="stat-icon red">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                                        </div>
+                                        <div class="stat-trend down">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 18l-9.5-9.5-5 5L1 6"/></svg>
+                                            -3
+                                        </div>
+                                    </div>
+                                    <div class="stat-value">23</div>
+                                    <div class="stat-label">高风险项</div>
+                                </div>
+                                <div class="stat-card" style="--stat-color: #10B981;">
+                                    <div class="stat-header">
+                                        <div class="stat-icon green">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                        </div>
+                                        <div class="stat-trend up">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 6l-9.5 9.5-5-5L1 18"/></svg>
+                                            +8%
+                                        </div>
+                                    </div>
+                                    <div class="stat-value">89%</div>
+                                    <div class="stat-label">缓解率</div>
+                                </div>
+                            </div>
+
+                            <!-- Main Grid -->
+                            <div class="main-grid">
+                                <!-- Projects Card -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">
+                                            <div class="card-title-icon blue">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+                                            </div>
+                                            项目进度
+                                        </h3>
+                                        <span class="card-action">
+                                            查看全部
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18l6-6-6-6"/></svg>
+                                        </span>
+                                    </div>
+                                    <div class="project-list">
+                                        <div class="project-item selected">
+                                            <div class="project-header">
+                                                <div class="project-info">
+                                                    <div class="project-icon blue">
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 16H9m10 0h3v-3.15a1 1 0 00-.84-.99L16 11l-2.7-3.6a1 1 0 00-.8-.4H5.24a2 2 0 00-1.8 1.1l-.8 1.63A6 6 0 002 12.42V16h2"/><circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg>
+                                                    </div>
+                                                    <div>
+                                                        <div class="project-name">MY25 EV平台</div>
+                                                        <div class="project-meta">
+                                                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg> 48 资产</span>
+                                                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg> 127 威胁</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <span class="status-badge active">进行中</span>
+                                            </div>
+                                            <div class="progress-bar">
+                                                <div class="progress-track"><div class="progress-fill" style="width: 68%"></div></div>
+                                                <span class="progress-text">68%</span>
+                                            </div>
+                                            <div class="project-footer">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                                                截止：2025-03-15
+                                            </div>
+                                        </div>
+                                        <div class="project-item">
+                                            <div class="project-header">
+                                                <div class="project-info">
+                                                    <div class="project-icon purple">
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 16H9m10 0h3v-3.15a1 1 0 00-.84-.99L16 11l-2.7-3.6a1 1 0 00-.8-.4H5.24a2 2 0 00-1.8 1.1l-.8 1.63A6 6 0 002 12.42V16h2"/><circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg>
+                                                    </div>
+                                                    <div>
+                                                        <div class="project-name">ADAS L3系统</div>
+                                                        <div class="project-meta">
+                                                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg> 32 资产</span>
+                                                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg> 85 威胁</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <span class="status-badge review">审核中</span>
+                                            </div>
+                                            <div class="progress-bar">
+                                                <div class="progress-track"><div class="progress-fill" style="width: 92%"></div></div>
+                                                <span class="progress-text">92%</span>
+                                            </div>
+                                            <div class="project-footer">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                                                截止：2025-02-28
+                                            </div>
+                                        </div>
+                                        <div class="project-item">
+                                            <div class="project-header">
+                                                <div class="project-info">
+                                                    <div class="project-icon cyan">
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 16H9m10 0h3v-3.15a1 1 0 00-.84-.99L16 11l-2.7-3.6a1 1 0 00-.8-.4H5.24a2 2 0 00-1.8 1.1l-.8 1.63A6 6 0 002 12.42V16h2"/><circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg>
+                                                    </div>
+                                                    <div>
+                                                        <div class="project-name">智能座舱2.0</div>
+                                                        <div class="project-meta">
+                                                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg> 21 资产</span>
+                                                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg> 43 威胁</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <span class="status-badge draft">草稿</span>
+                                            </div>
+                                            <div class="progress-bar">
+                                                <div class="progress-track"><div class="progress-fill" style="width: 25%"></div></div>
+                                                <span class="progress-text">25%</span>
+                                            </div>
+                                            <div class="project-footer">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                                                截止：2025-04-30
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Activity Card -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">
+                                            <div class="card-title-icon purple">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                                            </div>
+                                            最近活动
+                                        </h3>
+                                    </div>
+                                    <div class="activity-list">
+                                        <div class="activity-item">
+                                            <div class="activity-icon threat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg></div>
+                                            <div class="activity-content">
+                                                <div class="activity-action">完成威胁分析</div>
+                                                <div class="activity-target">CAN总线消息伪造攻击</div>
+                                                <div class="activity-time">张工程师 · 10分钟前</div>
+                                            </div>
+                                        </div>
+                                        <div class="activity-item">
+                                            <div class="activity-icon measure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+                                            <div class="activity-content">
+                                                <div class="activity-action">添加安全措施</div>
+                                                <div class="activity-target">消息认证机制(SecOC)</div>
+                                                <div class="activity-time">李分析师 · 25分钟前</div>
+                                            </div>
+                                        </div>
+                                        <div class="activity-item">
+                                            <div class="activity-icon risk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+                                            <div class="activity-content">
+                                                <div class="activity-action">更新风险评级</div>
+                                                <div class="activity-target">T-Box通信模块 → CAL-4</div>
+                                                <div class="activity-time">张工程师 · 1小时前</div>
+                                            </div>
+                                        </div>
+                                        <div class="activity-item">
+                                            <div class="activity-icon asset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2"/></svg></div>
+                                            <div class="activity-content">
+                                                <div class="activity-action">导入资产清单</div>
+                                                <div class="activity-target">ADAS子系统 (14个ECU)</div>
+                                                <div class="activity-time">王经理 · 2小时前</div>
+                                            </div>
+                                        </div>
+                                        <div class="activity-item">
+                                            <div class="activity-icon report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></div>
+                                            <div class="activity-content">
+                                                <div class="activity-action">生成TARA报告</div>
+                                                <div class="activity-target">MY25 EV平台 v1.2</div>
+                                                <div class="activity-time">系统 · 3小时前</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Charts Grid -->
+                            <div class="charts-grid">
+                                <!-- Heatmap -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">
+                                            <div class="card-title-icon red">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                                            </div>
+                                            风险热力图
+                                        </h3>
+                                        <span style="font-size: 12px; color: var(--text-muted);">影响度 × 可行性</span>
+                                    </div>
+                                    <div class="heatmap-container">
+                                        <div class="heatmap-labels">
+                                            <span>极高</span><span>高</span><span>中</span><span>低</span><span>极低</span>
+                                        </div>
+                                        <div class="heatmap-grid">
+                                            <div class="heatmap-cells">
+                                                <div class="heatmap-cell level-0"></div>
+                                                <div class="heatmap-cell level-1">1</div>
+                                                <div class="heatmap-cell level-1">2</div>
+                                                <div class="heatmap-cell level-1">1</div>
+                                                <div class="heatmap-cell level-0"></div>
+                                                <div class="heatmap-cell level-1">1</div>
+                                                <div class="heatmap-cell level-2">3</div>
+                                                <div class="heatmap-cell level-3">4</div>
+                                                <div class="heatmap-cell level-2">2</div>
+                                                <div class="heatmap-cell level-1">1</div>
+                                                <div class="heatmap-cell level-2">2</div>
+                                                <div class="heatmap-cell level-3">5</div>
+                                                <div class="heatmap-cell level-4">8</div>
+                                                <div class="heatmap-cell level-3">3</div>
+                                                <div class="heatmap-cell level-1">1</div>
+                                                <div class="heatmap-cell level-1">1</div>
+                                                <div class="heatmap-cell level-2">3</div>
+                                                <div class="heatmap-cell level-3">4</div>
+                                                <div class="heatmap-cell level-2">2</div>
+                                                <div class="heatmap-cell level-0"></div>
+                                                <div class="heatmap-cell level-0"></div>
+                                                <div class="heatmap-cell level-1">1</div>
+                                                <div class="heatmap-cell level-1">1</div>
+                                                <div class="heatmap-cell level-0"></div>
+                                                <div class="heatmap-cell level-0"></div>
+                                            </div>
+                                            <div class="heatmap-x-labels">
+                                                <span>极低</span><span>低</span><span>中</span><span>高</span><span>极高</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="heatmap-legend">
+                                        <div class="legend-item"><div class="legend-dot" style="background: rgba(16,185,129,0.5)"></div><span>低风险</span></div>
+                                        <div class="legend-item"><div class="legend-dot" style="background: rgba(245,158,11,0.6)"></div><span>中风险</span></div>
+                                        <div class="legend-item"><div class="legend-dot" style="background: rgba(239,68,68,0.7)"></div><span>高风险</span></div>
+                                        <div class="legend-item"><div class="legend-dot" style="background: rgba(185,28,28,0.85)"></div><span>极高风险</span></div>
+                                    </div>
+                                </div>
+
+                                <!-- STRIDE -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title">
+                                            <div class="card-title-icon orange">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                                            </div>
+                                            威胁分布 (STRIDE)
+                                        </h3>
+                                    </div>
+                                    <div class="stride-list">
+                                        <div class="stride-item">
+                                            <span class="stride-label">Spoofing</span>
+                                            <div class="stride-bar-container"><div class="stride-bar" style="width: 77%; background: #3B82F6;">28</div></div>
+                                            <span class="stride-percent">22%</span>
+                                        </div>
+                                        <div class="stride-item">
+                                            <span class="stride-label">Tampering</span>
+                                            <div class="stride-bar-container"><div class="stride-bar" style="width: 66%; background: #8B5CF6;">24</div></div>
+                                            <span class="stride-percent">19%</span>
+                                        </div>
+                                        <div class="stride-item">
+                                            <span class="stride-label">Repudiation</span>
+                                            <div class="stride-bar-container"><div class="stride-bar" style="width: 33%; background: #EC4899;">12</div></div>
+                                            <span class="stride-percent">9%</span>
+                                        </div>
+                                        <div class="stride-item">
+                                            <span class="stride-label">Disclosure</span>
+                                            <div class="stride-bar-container"><div class="stride-bar" style="width: 86%; background: #F59E0B;">31</div></div>
+                                            <span class="stride-percent">24%</span>
+                                        </div>
+                                        <div class="stride-item">
+                                            <span class="stride-label">DoS</span>
+                                            <div class="stride-bar-container"><div class="stride-bar" style="width: 50%; background: #EF4444;">18</div></div>
+                                            <span class="stride-percent">14%</span>
+                                        </div>
+                                        <div class="stride-item">
+                                            <span class="stride-label">Elevation</span>
+                                            <div class="stride-bar-container"><div class="stride-bar" style="width: 39%; background: #10B981;">14</div></div>
+                                            <span class="stride-percent">11%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Report Generator Page -->
+                    <div class="page-content" id="generator-page">
+                        <div class="report-generator animate-fadeIn">
+                            <!-- Hero -->
+                            <div class="hero-section">
+                                <div class="glow-1"></div>
+                                <div class="glow-2"></div>
+                                <div class="hero-content">
+                                    <div class="hero-badge">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                                        AI驱动
+                                    </div>
+                                    <h1 class="hero-title">🚀 <span>一键生成</span> TARA安全分析报告</h1>
+                                    <p class="hero-subtitle">上传资产清单和配置文件，AI自动完成威胁识别、风险评估，生成符合ISO 21434标准的专业报告。支持多轮对话优化。</p>
+                                    <div class="hero-features">
+                                        <div class="hero-feature">
+                                            <div class="hero-feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></div>
+                                            支持Excel/CSV/JSON
+                                        </div>
+                                        <div class="hero-feature">
+                                            <div class="hero-feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></div>
+                                            STRIDE威胁建模
+                                        </div>
+                                        <div class="hero-feature">
+                                            <div class="hero-feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></div>
+                                            CAL风险评估
+                                        </div>
+                                        <div class="hero-feature">
+                                            <div class="hero-feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></div>
+                                            多轮对话优化
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Steps -->
+                            <div class="steps-indicator">
+                                <div class="step-item active" data-step="1">
+                                    <div class="step-number">1</div>
+                                    <div class="step-info">
+                                        <div class="step-label">上传文件</div>
+                                        <div class="step-desc">资产清单/配置</div>
+                                    </div>
+                                </div>
+                                <div class="step-connector"></div>
+                                <div class="step-item" data-step="2">
+                                    <div class="step-number">2</div>
+                                    <div class="step-info">
+                                        <div class="step-label">选择模板</div>
+                                        <div class="step-desc">报告类型</div>
+                                    </div>
+                                </div>
+                                <div class="step-connector"></div>
+                                <div class="step-item" data-step="3">
+                                    <div class="step-number">3</div>
+                                    <div class="step-info">
+                                        <div class="step-label">填写提示</div>
+                                        <div class="step-desc">分析要求</div>
+                                    </div>
+                                </div>
+                                <div class="step-connector"></div>
+                                <div class="step-item" data-step="4">
+                                    <div class="step-number">4</div>
+                                    <div class="step-info">
+                                        <div class="step-label">生成优化</div>
+                                        <div class="step-desc">AI分析</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Generator Grid -->
+                            <div class="generator-grid">
+                                <div class="generator-main">
+                                    <!-- Upload -->
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title">
+                                                <div class="card-title-icon blue">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                                                </div>
+                                                上传分析文件
+                                            </h3>
+                                        </div>
+                                        <div class="upload-zone" id="upload-zone">
+                                            <input type="file" id="file-input" multiple accept=".xlsx,.xls,.csv,.json,.pdf" style="display:none">
+                                            <div class="upload-icon">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                                            </div>
+                                            <div class="upload-title">拖拽文件到此处，或点击上传</div>
+                                            <div class="upload-desc">支持资产清单、ECU配置、网络拓扑等文件</div>
+                                            <div class="upload-formats">
+                                                <span class="format-tag">Excel (.xlsx)</span>
+                                                <span class="format-tag">CSV (.csv)</span>
+                                                <span class="format-tag">JSON (.json)</span>
+                                                <span class="format-tag">PDF (.pdf)</span>
+                                            </div>
+                                        </div>
+                                        <div class="file-list" id="file-list"></div>
+                                    </div>
+
+                                    <!-- Templates -->
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title">
+                                                <div class="card-title-icon purple">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                                                </div>
+                                                选择报告模板
+                                            </h3>
+                                        </div>
+                                        <div class="template-grid">
+                                            <button class="template-btn selected" onclick="selectTemplate(this, 'full')">
+                                                <div class="template-icon" style="background: rgba(59,130,246,0.12); color: #60A5FA;">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+                                                </div>
+                                                <div class="template-title">完整TARA报告</div>
+                                                <div class="template-desc">资产识别 + 威胁分析 + 风险评估 + 措施建议，符合ISO 21434标准</div>
+                                            </button>
+                                            <button class="template-btn" onclick="selectTemplate(this, 'threat')">
+                                                <div class="template-icon" style="background: rgba(245,158,11,0.12); color: #FBBF24;">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                                                </div>
+                                                <div class="template-title">威胁分析报告</div>
+                                                <div class="template-desc">专注STRIDE威胁识别、攻击树分析和攻击路径推理</div>
+                                            </button>
+                                            <button class="template-btn" onclick="selectTemplate(this, 'risk')">
+                                                <div class="template-icon" style="background: rgba(239,68,68,0.12); color: #F87171;">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                                                </div>
+                                                <div class="template-title">风险评估报告</div>
+                                                <div class="template-desc">影响分析、CAL等级评估、风险矩阵和优先级排序</div>
+                                            </button>
+                                            <button class="template-btn" onclick="selectTemplate(this, 'measure')">
+                                                <div class="template-icon" style="background: rgba(16,185,129,0.12); color: #34D399;">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                                </div>
+                                                <div class="template-title">安全措施报告</div>
+                                                <div class="template-desc">防护策略、控制措施、验证方案和实施路线图</div>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Prompt -->
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title">
+                                                <div class="card-title-icon cyan">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                                                </div>
+                                                分析提示词
+                                            </h3>
+                                        </div>
+                                        <div class="prompt-container">
+                                            <textarea id="prompt-input" placeholder="请描述您的具体分析需求...">请对上传的资产清单进行完整的TARA分析，包括：
+1. 识别所有ECU资产及其通信接口（CAN、Ethernet、LIN等）
+2. 基于STRIDE模型进行全面的威胁识别
+3. 计算每个威胁的CAL风险等级（考虑影响度和可行性）
+4. 针对CAL-3及以上高风险项提供具体的安全措施建议
+5. 生成符合ISO 21434标准格式的专业报告</textarea>
+                                        </div>
+                                        <div class="prompt-toolbar">
+                                            <span class="char-count"><span id="char-count">0</span> / 2000</span>
+                                            <button class="btn btn-ghost btn-sm" onclick="clearPrompt()">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                                                清空
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Generate -->
+                                    <div class="generate-section">
+                                        <button class="generate-btn" id="generate-btn" onclick="generateReport()">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg>
+                                            一键生成TARA报告
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="generator-sidebar">
+                                    <!-- Preview -->
+                                    <div class="preview-card">
+                                        <div class="preview-header">
+                                            <h4>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                                分析预览
+                                            </h4>
+                                        </div>
+                                        <div class="preview-content">
+                                            <div id="preview-empty" class="preview-empty">
+                                                📁 上传文件后显示分析预览
+                                            </div>
+                                            <div id="preview-stats" style="display: none;">
+                                                <div class="preview-stats">
+                                                    <div class="preview-stat blue">
+                                                        <div class="preview-stat-value" id="preview-assets">0</div>
+                                                        <div class="preview-stat-label">识别资产</div>
+                                                    </div>
+                                                    <div class="preview-stat orange">
+                                                        <div class="preview-stat-value" id="preview-threats">0</div>
+                                                        <div class="preview-stat-label">预估威胁</div>
+                                                    </div>
+                                                </div>
+                                                <div class="preview-info">预计生成时间: <strong>2-3分钟</strong></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Tips -->
+                                    <div class="tips-card">
+                                        <div class="tips-header">
+                                            <h4>
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                                                使用提示
+                                            </h4>
+                                        </div>
+                                        <div class="tips-content">
+                                            <p>📁 文件要求</p>
+                                            <ul>
+                                                <li>Excel需包含资产名称、类型、接口列</li>
+                                                <li>CSV使用UTF-8编码</li>
+                                                <li>JSON符合TARA资产模型格式</li>
+                                            </ul>
+                                            <p>💡 优化建议</p>
+                                            <ul>
+                                                <li>提供详细的系统架构描述</li>
+                                                <li>标注资产的安全等级要求</li>
+                                                <li>说明已有的安全控制措施</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Panel -->
+                <aside class="ai-panel" id="ai-panel">
+                    <div class="ai-header">
+                        <div class="ai-info">
+                            <div class="ai-avatar">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9.5 2A2.5 2.5 0 0112 4.5v15a2.5 2.5 0 01-4.96.44 2.5 2.5 0 01-2.96-3.08 3 3 0 01-.34-5.58 2.5 2.5 0 011.32-4.24 2.5 2.5 0 011.98-3A2.5 2.5 0 019.5 2z"/><path d="M14.5 2A2.5 2.5 0 0012 4.5v15a2.5 2.5 0 004.96.44 2.5 2.5 0 002.96-3.08 3 3 0 00.34-5.58 2.5 2.5 0 00-1.32-4.24 2.5 2.5 0 00-1.98-3A2.5 2.5 0 0014.5 2z"/></svg>
+                            </div>
+                            <div>
+                                <div class="ai-title">TARA AI 助手</div>
+                                <div class="ai-status">
+                                    <span class="dot"></span>
+                                    Qwen3-235B · 在线
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ai-header-actions">
+                            <button class="btn btn-icon btn-ghost" onclick="clearMessages()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="ai-mode-tabs">
+                        <button class="mode-tab active" onclick="switchAIMode('chat')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                            智能对话
+                        </button>
+                        <button class="mode-tab" onclick="switchAIMode('optimize')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            报告优化
+                        </button>
+                    </div>
+
+                    <div class="ai-quick-actions">
+                        <div class="quick-actions-grid">
+                            <button class="quick-action-btn" onclick="sendQuickAction('威胁识别')">
+                                <div class="quick-action-icon" style="background: rgba(59,130,246,0.12); color: #60A5FA;">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                                </div>
+                                <div>
+                                    <div class="quick-action-label">威胁识别</div>
+                                    <div class="quick-action-desc">STRIDE分析</div>
+                                </div>
+                            </button>
+                            <button class="quick-action-btn" onclick="sendQuickAction('攻击路径')">
+                                <div class="quick-action-icon" style="background: rgba(139,92,246,0.12); color: #A78BFA;">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 009 9"/></svg>
+                                </div>
+                                <div>
+                                    <div class="quick-action-label">攻击路径</div>
+                                    <div class="quick-action-desc">图谱推理</div>
+                                </div>
+                            </button>
+                            <button class="quick-action-btn" onclick="sendQuickAction('风险计算')">
+                                <div class="quick-action-icon" style="background: rgba(245,158,11,0.12); color: #FBBF24;">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                                </div>
+                                <div>
+                                    <div class="quick-action-label">风险计算</div>
+                                    <div class="quick-action-desc">CAL评估</div>
+                                </div>
+                            </button>
+                            <button class="quick-action-btn" onclick="sendQuickAction('措施推荐')">
+                                <div class="quick-action-icon" style="background: rgba(16,185,129,0.12); color: #34D399;">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                </div>
+                                <div>
+                                    <div class="quick-action-label">措施推荐</div>
+                                    <div class="quick-action-desc">策略匹配</div>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="ai-messages" id="ai-messages"></div>
+
+                    <div class="ai-input">
+                        <div class="input-container">
+                            <textarea id="message-input" rows="2" placeholder="输入您的问题或修改意见..." onkeydown="handleKeyDown(event)"></textarea>
+                            <div class="input-toolbar">
+                                <div class="input-tools">
+                                    <button class="tool-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></button>
+                                    <button class="tool-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></button>
+                                    <button class="tool-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg></button>
+                                </div>
+                                <button class="send-btn" onclick="sendMessage()">
+                                    发送
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="input-hint">
+                            <span>Enter 发送 · Shift+Enter 换行</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> 深度推理</span>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // State
+        let currentTab = 'dashboard';
+        let uploadedFiles = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeMessages();
+            setupUpload();
+            updateCharCount();
+        });
+
+        // Tab Switching
+        function switchTab(tabId) {
+            currentTab = tabId;
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.tab === tabId) item.classList.add('active');
+            });
+            document.querySelectorAll('.page-content').forEach(page => page.classList.remove('active'));
+            const page = document.getElementById(tabId + '-page');
+            if (page) page.classList.add('active');
+            
+            const titles = {
+                dashboard: { icon: 'home', label: '工作台', color: 'blue' },
+                generator: { icon: 'sparkles', label: '一键生成报告', color: 'purple' }
+            };
+            const titleEl = document.getElementById('page-title');
+            const t = titles[tabId] || titles.dashboard;
+            titleEl.querySelector('span').textContent = t.label;
+        }
+
+        // Sidebar
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+        }
+
+        // Upload
+        function setupUpload() {
+            const zone = document.getElementById('upload-zone');
+            const input = document.getElementById('file-input');
+            
+            zone.addEventListener('click', () => input.click());
+            zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+            zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+            zone.addEventListener('drop', e => {
+                e.preventDefault();
+                zone.classList.remove('dragover');
+                handleFiles(e.dataTransfer.files);
+            });
+            input.addEventListener('change', e => handleFiles(e.target.files));
+        }
+
+        function handleFiles(files) {
+            Array.from(files).forEach(file => {
+                const fileData = {
+                    id: Date.now() + Math.random(),
+                    name: file.name,
+                    size: formatFileSize(file.size),
+                    type: file.name.split('.').pop().toLowerCase(),
+                    status: 'processing'
+                };
+                uploadedFiles.push(fileData);
+                renderFiles();
+                setTimeout(() => {
+                    fileData.status = 'success';
+                    renderFiles();
+                    updatePreview();
+                }, 1500);
+            });
+            document.getElementById('upload-zone').classList.add('has-files');
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        function renderFiles() {
+            const list = document.getElementById('file-list');
+            list.innerHTML = uploadedFiles.map(f => `
+                <div class="file-item">
+                    <div class="file-icon ${f.type}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></div>
+                    <div class="file-info">
+                        <div class="file-name">${f.name}</div>
+                        <div class="file-meta"><span>${f.size}</span><span>${f.type.toUpperCase()}</span></div>
+                    </div>
+                    <div class="file-status ${f.status}">${f.status === 'success' ? '✓ 已解析' : '⟳ 解析中'}</div>
+                    <button class="file-remove" onclick="removeFile('${f.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+                </div>
+            `).join('');
+        }
+
+        function removeFile(id) {
+            uploadedFiles = uploadedFiles.filter(f => f.id != id);
+            renderFiles();
+            updatePreview();
+            if (!uploadedFiles.length) document.getElementById('upload-zone').classList.remove('has-files');
+        }
+
+        function updatePreview() {
+            const hasFiles = uploadedFiles.length > 0;
+            document.getElementById('preview-empty').style.display = hasFiles ? 'none' : 'block';
+            document.getElementById('preview-stats').style.display = hasFiles ? 'block' : 'none';
+            if (hasFiles) {
+                document.getElementById('preview-assets').textContent = Math.floor(Math.random() * 30) + 20;
+                document.getElementById('preview-threats').textContent = Math.floor(Math.random() * 80) + 50;
+            }
+        }
+
+        // Templates
+        function selectTemplate(btn, type) {
+            document.querySelectorAll('.template-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+        }
+
+        // Prompt
+        function updateCharCount() {
+            const count = document.getElementById('prompt-input').value.length;
+            document.getElementById('char-count').textContent = count;
+        }
+        document.getElementById('prompt-input')?.addEventListener('input', updateCharCount);
+        function clearPrompt() { document.getElementById('prompt-input').value = ''; updateCharCount(); }
+
+        // Generate
+        function generateReport() {
+            if (!uploadedFiles.length) { alert('请先上传分析文件！'); return; }
+            const btn = document.getElementById('generate-btn');
+            btn.disabled = true;
+            btn.classList.add('generating');
+            btn.innerHTML = '<svg class="animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg> 正在生成...';
+            
+            addMessage({ role: 'assistant', content: '正在分析上传的文件...\n\n📊 分析进度\n✅ 文件解析完成\n⏳ 资产识别中...\n⏳ 威胁建模中...\n⏳ 风险评估中...', time: getTime() });
+            
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.classList.remove('generating');
+                btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg> 一键生成TARA报告';
+                addMessage({ role: 'assistant', content: '✅ **报告生成完成！**\n\n已识别 **48个资产** 和 **127个威胁场景**，其中 **23个高风险项** 需要重点关注。\n\n您可以通过对话继续优化报告内容。', time: getTime(), sources: ['ISO 21434', 'STRIDE', 'CAL评估'] });
+            }, 3000);
+        }
+
+        // AI Messages
+        function initializeMessages() {
+            addMessage({
+                role: 'assistant',
+                content: '您好！我是TARA智能分析助手，基于Qwen3大模型。\n\n我可以帮您：\n• **生成报告** - 上传文件后一键生成TARA报告\n• **优化内容** - 多轮对话逐步完善报告\n• **回答问题** - 解答安全分析相关疑问\n\n请开始使用吧！',
+                time: getTime(),
+                sources: ['ISO 21434', 'UN R155']
+            });
+        }
+
+        function getTime() {
+            return new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function addMessage(msg) {
+            const container = document.getElementById('ai-messages');
+            const el = document.createElement('div');
+            el.className = `message ${msg.role} animate-fadeIn`;
+            
+            if (msg.role === 'assistant') {
+                el.innerHTML = `
+                    <div class="message-header">
+                        <div class="message-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg></div>
+                        <span class="message-time">AI · ${msg.time}</span>
+                    </div>
+                    <div class="message-bubble">${msg.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>')}</div>
+                    ${msg.sources ? `<div class="message-sources"><span>参考：</span>${msg.sources.map(s => `<span class="source-tag">${s}</span>`).join('')}</div>` : ''}
+                `;
+            } else {
+                el.innerHTML = `
+                    <div class="message-bubble">${msg.content.replace(/\n/g, '<br>')}</div>
+                    <div class="user-time">${msg.time}</div>
+                `;
+            }
+            container.appendChild(el);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('message-input');
+            const content = input.value.trim();
+            if (!content) return;
+            
+            addMessage({ role: 'user', content, time: getTime() });
+            input.value = '';
+            
+            // Typing
+            const container = document.getElementById('ai-messages');
+            const typing = document.createElement('div');
+            typing.className = 'typing-indicator';
+            typing.id = 'typing';
+            typing.innerHTML = '<div class="message-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" style="width:14px;height:14px"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg></div><div class="typing-dots"><span></span><span></span><span></span></div>';
+            container.appendChild(typing);
+            container.scrollTop = container.scrollHeight;
+            
+            setTimeout(() => {
+                typing.remove();
+                addMessage({
+                    role: 'assistant',
+                    content: `根据您的问题，我进行了分析：\n\n**分析结果**\n${content.includes('威胁') ? '已识别相关威胁场景，建议重点关注CAN总线安全。' : '您的问题涉及TARA分析流程，建议参考ISO 21434第8章。'}\n\n如需进一步分析，请继续提问。`,
+                    time: getTime(),
+                    sources: ['ISO 21434']
+                });
+            }, 1500);
+        }
+
+        function handleKeyDown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+        }
+
+        function sendQuickAction(action) {
+            const prompts = { '威胁识别': '请进行STRIDE威胁分析', '攻击路径': '请分析攻击路径', '风险计算': '请计算CAL风险等级', '措施推荐': '请推荐安全措施' };
+            document.getElementById('message-input').value = prompts[action] || '';
+            sendMessage();
+        }
+
+        function clearMessages() {
+            document.getElementById('ai-messages').innerHTML = '';
+            initializeMessages();
+        }
+
+        function switchAIMode(mode) {
+            document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+            event.target.closest('.mode-tab').classList.add('active');
+        }
+    </script>
+</body>
+</html>
