@@ -24,7 +24,7 @@ jobs:
       redis:
         image: redis:7-alpine
         ports:
-          - 6379:6379
+          - 6380:6379
         options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
     
     steps:
@@ -52,7 +52,7 @@ jobs:
         env:
           DATABASE_URL: mysql+aiomysql://root:password@localhost:3307/intelli_tara_test
           REDIS_HOST: localhost
-          REDIS_PORT: 6379
+          REDIS_PORT: 6380
           JWT_SECRET_KEY: test-secret-key
         run: |
           uv run pytest tests/ -v --tb=short || true

@@ -78,6 +78,8 @@ services:
   mysql:
     image: mysql:8.0
     container_name: intelli-tara-mysql
+    ports:
+      - "3307:3306"
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-password}
       MYSQL_DATABASE: intelli_tara
@@ -99,6 +101,8 @@ services:
   redis:
     image: redis:7-alpine
     container_name: intelli-tara-redis
+    ports:
+      - "6380:6379"
     command: redis-server --appendonly yes
     volumes:
       - redis_data:/data

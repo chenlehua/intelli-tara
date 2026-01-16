@@ -1,73 +1,101 @@
-.PHONY: help install dev build test deploy clean frontend-install frontend-dev frontend-build backend-install backend-dev backend-test db-up db-down migrate
+# Intelli-TARA Docker 管理命令
+# 使用方法: make <command> [SERVICE=xxx]
+
+.PHONY: build rebuild up down restart logs list help
+
+# Docker Compose 配置
+COMPOSE_FILE := deploy/docker-compose.dev.yml
+COMPOSE_CMD := docker compose -f $(COMPOSE_FILE)
+
+# 服务列表
+SERVICES := mysql redis neo4j elasticsearch minio kafka
+
+# 默认目标
+.DEFAULT_GOAL := help
 
 help:
-	@echo "Intelli-TARA 构建命令"
+	@echo "Intelli-TARA Docker 管理命令"
 	@echo ""
-	@echo "  make install         - 安装所有依赖"
-	@echo "  make dev             - 启动开发环境"
-	@echo "  make build           - 构建生产版本"
-	@echo "  make test            - 运行测试"
-	@echo "  make deploy          - 部署服务"
-	@echo "  make clean           - 清理构建文件"
+	@echo "使用方法: make <command> [SERVICE=xxx]"
 	@echo ""
-	@echo "  make db-up           - 启动数据库服务"
-	@echo "  make db-down         - 停止数据库服务"
-	@echo "  make migrate         - 执行数据库迁移"
+	@echo "命令列表:"
+	@echo "  make build   [SERVICE=xxx]  - 构建服务镜像"
+	@echo "  make rebuild [SERVICE=xxx]  - 重新构建服务镜像 (不使用缓存)"
+	@echo "  make up      [SERVICE=xxx]  - 启动服务"
+	@echo "  make down    [SERVICE=xxx]  - 停止并移除服务"
+	@echo "  make restart [SERVICE=xxx]  - 重启服务"
+	@echo "  make logs    [SERVICE=xxx]  - 查看服务日志"
+	@echo "  make list                   - 查看所有服务状态"
 	@echo ""
-	@echo "  make frontend-dev    - 启动前端开发服务"
-	@echo "  make backend-dev     - 启动后端开发服务"
+	@echo "可用服务: $(SERVICES)"
+	@echo ""
+	@echo "示例:"
+	@echo "  make up                     - 启动所有服务"
+	@echo "  make up SERVICE=mysql       - 仅启动 mysql 服务"
+	@echo "  make logs SERVICE=redis     - 查看 redis 日志"
+	@echo "  make restart SERVICE=mysql  - 重启 mysql 服务"
 
-# Install dependencies
-install: frontend-install backend-install
+# 构建服务镜像
+build:
+ifdef SERVICE
+	$(COMPOSE_CMD) build $(SERVICE)
+else
+	$(COMPOSE_CMD) build
+endif
 
-frontend-install:
-	cd frontend && npm install
+# 重新构建服务镜像 (不使用缓存)
+rebuild:
+ifdef SERVICE
+	$(COMPOSE_CMD) build --no-cache $(SERVICE)
+else
+	$(COMPOSE_CMD) build --no-cache
+endif
 
-backend-install:
-	cd backend && pip install uv && uv sync
+# 启动服务
+up:
+ifdef SERVICE
+	$(COMPOSE_CMD) up -d $(SERVICE)
+else
+	$(COMPOSE_CMD) up -d
+endif
 
-# Development
-dev:
-	@echo "请分别运行 make backend-dev 和 make frontend-dev"
+# 停止并移除服务
+down:
+ifdef SERVICE
+	$(COMPOSE_CMD) stop $(SERVICE)
+	$(COMPOSE_CMD) rm -f $(SERVICE)
+else
+	$(COMPOSE_CMD) down
+endif
 
-frontend-dev:
-	cd frontend && npm run dev
+# 重启服务
+restart:
+ifdef SERVICE
+	$(COMPOSE_CMD) restart $(SERVICE)
+else
+	$(COMPOSE_CMD) restart
+endif
 
-backend-dev:
-	cd backend && uv run uvicorn main:app --reload --host 0.0.0.0 --port 8000
+# 查看服务日志
+logs:
+ifdef SERVICE
+	$(COMPOSE_CMD) logs -f $(SERVICE)
+else
+	$(COMPOSE_CMD) logs -f
+endif
 
-# Build
-build: frontend-build
-
-frontend-build:
-	cd frontend && npm run build
-
-# Test
-test: backend-test
-
-backend-test:
-	cd backend && uv run pytest
-
-# Database
-db-up:
-	docker compose -f deploy/docker-compose.dev.yml up -d
-
-db-down:
-	docker compose -f deploy/docker-compose.dev.yml down
-
-migrate:
-	cd backend && uv run alembic upgrade head
-
-migrate-create:
-	cd backend && uv run alembic revision --autogenerate -m "$(message)"
-
-# Deploy
-deploy:
-	docker compose -f deploy/docker-compose.yml up -d --build
-
-# Clean
-clean:
-	rm -rf frontend/dist frontend/node_modules
-	rm -rf backend/.venv backend/__pycache__
-	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
-	find . -type f -name "*.pyc" -delete 2>/dev/null || true
+# 查看所有服务状态 (包括未启动的服务)
+list:
+	@echo "=========================================="
+	@echo "Intelli-TARA 服务状态"
+	@echo "=========================================="
+	@echo ""
+	@echo "已定义的服务:"
+	@$(COMPOSE_CMD) config --services | while read service; do \
+		echo "  - $$service"; \
+	done
+	@echo ""
+	@echo "服务运行状态:"
+	@$(COMPOSE_CMD) ps -a
+	@echo ""
+	@echo "=========================================="

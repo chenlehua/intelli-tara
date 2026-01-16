@@ -57,11 +57,69 @@ docker-compose up -d
 
 ## 开发环境
 
+### Make 命令列表
+
+```bash
+# 查看所有可用命令
+make help
+
+# 命令格式: make <command> [SERVICE=xxx]
+# 可用命令:
+#   make build   [SERVICE=xxx]  - 构建服务镜像
+#   make rebuild [SERVICE=xxx]  - 重新构建服务镜像 (不使用缓存)
+#   make up      [SERVICE=xxx]  - 启动服务
+#   make down    [SERVICE=xxx]  - 停止并移除服务
+#   make restart [SERVICE=xxx]  - 重启服务
+#   make logs    [SERVICE=xxx]  - 查看服务日志
+#   make list                   - 查看所有服务状态
+```
+
 ### 启动开发数据库
 
 ```bash
-cd deploy
-docker-compose -f docker-compose.dev.yml up -d
+# 启动所有服务
+make up
+
+# 或仅启动特定服务
+make up SERVICE=mysql
+make up SERVICE=redis
+```
+
+### 查看服务状态
+
+```bash
+# 查看所有服务状态 (包括未启动的服务)
+make list
+```
+
+### 查看服务日志
+
+```bash
+# 查看所有服务日志
+make logs
+
+# 查看特定服务日志
+make logs SERVICE=mysql
+```
+
+### 重启服务
+
+```bash
+# 重启所有服务
+make restart
+
+# 重启特定服务
+make restart SERVICE=redis
+```
+
+### 停止服务
+
+```bash
+# 停止所有服务
+make down
+
+# 停止特定服务
+make down SERVICE=mysql
 ```
 
 ### 启动后端
@@ -140,7 +198,7 @@ docker-compose logs -f backend
 |-----|------|--------|
 | DATABASE_URL | MySQL 连接字符串 | - |
 | REDIS_HOST | Redis 主机 | localhost |
-| REDIS_PORT | Redis 端口 | 6379 |
+| REDIS_PORT | Redis 端口 | 6380 |
 | NEO4J_URI | Neo4j 连接 URI | bolt://localhost:7687 |
 | QWEN_API_KEY | 阿里云 Qwen API 密钥 | - |
 | JWT_SECRET_KEY | JWT 签名密钥 | - |
@@ -154,7 +212,7 @@ docker-compose logs -f backend
 | Nginx (HTTPS) | 443 |
 | Backend API | 8000 |
 | MySQL | 3307 |
-| Redis | 6379 |
+| Redis | 6380 |
 | Neo4j | 7687 |
 | Elasticsearch | 9200 |
 | MinIO | 9000 |

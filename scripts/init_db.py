@@ -12,6 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
 
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from app.core.database import async_session_factory, engine, Base
 from app.core.security import get_password_hash
 from app.models.user import User, Role, Permission, UserRole, RolePermission
@@ -110,8 +111,9 @@ async def init_roles(session):
     all_permissions = {p.code: p for p in result.scalars().all()}
 
     for role_name, role_config in DEFAULT_ROLES.items():
+        # Query with eager loading of permissions
         result = await session.execute(
-            select(Role).where(Role.name == role_name)
+            select(Role).where(Role.name == role_name).options(selectinload(Role.permissions))
         )
         role = result.scalar_one_or_none()
 
@@ -122,6 +124,8 @@ async def init_roles(session):
             )
             session.add(role)
             await session.flush()
+            # Refresh to get the role with empty permissions list
+            await session.refresh(role, ['permissions'])
 
         # Assign permissions
         for perm_code in role_config["permissions"]:
@@ -138,7 +142,7 @@ async def init_roles(session):
 async def init_admin_user(session):
     """Initialize default admin user."""
     result = await session.execute(
-        select(User).where(User.username == "admin")
+        select(User).where(User.username == "admin").options(selectinload(User.roles))
     )
     admin = result.scalar_one_or_none()
 
@@ -156,8 +160,10 @@ async def init_admin_user(session):
             display_name="系统管理员",
             status="active",
         )
-        admin.roles.append(admin_role)
         session.add(admin)
+        await session.flush()
+        await session.refresh(admin, ['roles'])
+        admin.roles.append(admin_role)
         await session.commit()
         print("Admin user created (username: admin, password: admin123)")
     else:
