@@ -1,0 +1,98 @@
+[
+  {
+    "id": "AP-001",
+    "name": "CAN Bus Message Injection",
+    "name_zh": "CAN总线消息注入",
+    "description": "Attacker injects malicious messages onto the CAN bus to control vehicle functions",
+    "description_zh": "攻击者向CAN总线注入恶意消息以控制车辆功能",
+    "prerequisites": "Physical or remote access to CAN bus",
+    "attack_steps": "1. Gain access to CAN bus\n2. Analyze CAN message format\n3. Inject malicious messages\n4. Control target ECU functions",
+    "mitigations": "Message authentication, Intrusion detection, Network segmentation",
+    "related_cwe": ["CWE-306", "CWE-345"],
+    "related_capec": "CAPEC-94"
+  },
+  {
+    "id": "AP-002",
+    "name": "OBD-II Port Exploitation",
+    "name_zh": "OBD-II端口利用",
+    "description": "Attacker uses OBD-II port to access vehicle networks and systems",
+    "description_zh": "攻击者使用OBD-II端口访问车辆网络和系统",
+    "prerequisites": "Physical access to OBD-II port",
+    "attack_steps": "1. Connect to OBD-II port\n2. Enumerate available services\n3. Bypass authentication if present\n4. Access vehicle systems",
+    "mitigations": "OBD-II port protection, Authentication, Access logging",
+    "related_cwe": ["CWE-284", "CWE-306"],
+    "related_capec": "CAPEC-112"
+  },
+  {
+    "id": "AP-003",
+    "name": "Wireless Key Fob Relay Attack",
+    "name_zh": "无线钥匙中继攻击",
+    "description": "Attacker relays key fob signals to unlock and start vehicle",
+    "description_zh": "攻击者中继钥匙信号以解锁和启动车辆",
+    "prerequisites": "Proximity to key fob and vehicle",
+    "attack_steps": "1. Position relay device near vehicle\n2. Position receiver near key fob\n3. Relay signals between devices\n4. Unlock and start vehicle",
+    "mitigations": "UWB ranging, Motion detection in key fob, Signal strength verification",
+    "related_cwe": ["CWE-294", "CWE-941"],
+    "related_capec": "CAPEC-386"
+  },
+  {
+    "id": "AP-004",
+    "name": "Telematics Unit Compromise",
+    "name_zh": "车载远程通信单元攻陷",
+    "description": "Attacker compromises telematics unit to gain remote access to vehicle",
+    "description_zh": "攻击者攻陷车载远程通信单元以获得对车辆的远程访问",
+    "prerequisites": "Network access to telematics unit",
+    "attack_steps": "1. Identify telematics unit vulnerabilities\n2. Exploit vulnerability remotely\n3. Gain code execution\n4. Pivot to vehicle networks",
+    "mitigations": "Secure boot, Firmware signing, Network isolation, Vulnerability management",
+    "related_cwe": ["CWE-94", "CWE-502"],
+    "related_capec": "CAPEC-17"
+  },
+  {
+    "id": "AP-005",
+    "name": "Infotainment System Exploitation",
+    "name_zh": "信息娱乐系统利用",
+    "description": "Attacker exploits IVI vulnerabilities to access vehicle systems",
+    "description_zh": "攻击者利用IVI漏洞访问车辆系统",
+    "prerequisites": "Physical or remote access to IVI",
+    "attack_steps": "1. Identify IVI attack surface\n2. Exploit web browser or app vulnerability\n3. Escape application sandbox\n4. Access underlying systems",
+    "mitigations": "App sandboxing, Secure coding, Regular updates, Network segmentation",
+    "related_cwe": ["CWE-94", "CWE-79", "CWE-89"],
+    "related_capec": "CAPEC-242"
+  },
+  {
+    "id": "AP-006",
+    "name": "Firmware Update Attack",
+    "name_zh": "固件更新攻击",
+    "description": "Attacker modifies or replaces firmware to gain persistent access",
+    "description_zh": "攻击者修改或替换固件以获得持久访问",
+    "prerequisites": "Access to update mechanism",
+    "attack_steps": "1. Intercept or access update process\n2. Modify firmware image\n3. Bypass signature verification\n4. Install malicious firmware",
+    "mitigations": "Code signing, Secure boot, Rollback protection, Update authentication",
+    "related_cwe": ["CWE-494", "CWE-345"],
+    "related_capec": "CAPEC-186"
+  },
+  {
+    "id": "AP-007",
+    "name": "GPS Spoofing",
+    "name_zh": "GPS欺骗",
+    "description": "Attacker broadcasts fake GPS signals to mislead vehicle navigation",
+    "description_zh": "攻击者广播虚假GPS信号以误导车辆导航",
+    "prerequisites": "GPS spoofing equipment",
+    "attack_steps": "1. Acquire GPS spoofing device\n2. Generate fake GPS signals\n3. Overpower legitimate signals\n4. Mislead vehicle navigation",
+    "mitigations": "GPS signal authentication, Multi-source positioning, Anomaly detection",
+    "related_cwe": ["CWE-345", "CWE-290"],
+    "related_capec": "CAPEC-148"
+  },
+  {
+    "id": "AP-008",
+    "name": "Bluetooth Attack",
+    "name_zh": "蓝牙攻击",
+    "description": "Attacker exploits Bluetooth vulnerabilities to access vehicle systems",
+    "description_zh": "攻击者利用蓝牙漏洞访问车辆系统",
+    "prerequisites": "Bluetooth range proximity",
+    "attack_steps": "1. Scan for Bluetooth devices\n2. Identify vulnerable services\n3. Exploit Bluetooth vulnerability\n4. Access vehicle systems",
+    "mitigations": "Disable unused services, Strong pairing, Regular updates, Bluetooth authentication",
+    "related_cwe": ["CWE-287", "CWE-327"],
+    "related_capec": "CAPEC-555"
+  }
+]

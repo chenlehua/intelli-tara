@@ -1,0 +1,161 @@
+[
+  {
+    "type": "S",
+    "name": "Spoofing",
+    "name_zh": "欺骗",
+    "description": "Pretending to be something or someone other than yourself",
+    "description_zh": "冒充其他实体或用户",
+    "security_property": "Authenticity",
+    "security_property_zh": "真实性",
+    "examples": [
+      "Spoofing identity of a user",
+      "Spoofing identity of a process",
+      "Spoofing identity of a data store",
+      "Spoofing a network endpoint"
+    ],
+    "examples_zh": [
+      "冒充用户身份",
+      "冒充进程身份",
+      "冒充数据存储",
+      "冒充网络端点"
+    ],
+    "automotive_examples": [
+      "Spoofing ECU identity on CAN bus",
+      "Spoofing backend server to vehicle",
+      "Spoofing key fob signals",
+      "Spoofing GPS signals"
+    ]
+  },
+  {
+    "type": "T",
+    "name": "Tampering",
+    "name_zh": "篡改",
+    "description": "Modifying data or code without authorization",
+    "description_zh": "未经授权修改数据或代码",
+    "security_property": "Integrity",
+    "security_property_zh": "完整性",
+    "examples": [
+      "Modifying data in transit",
+      "Modifying data at rest",
+      "Modifying code",
+      "Modifying configuration"
+    ],
+    "examples_zh": [
+      "修改传输中的数据",
+      "修改存储的数据",
+      "修改代码",
+      "修改配置"
+    ],
+    "automotive_examples": [
+      "Tampering with firmware updates",
+      "Modifying CAN bus messages",
+      "Altering diagnostic data",
+      "Changing vehicle parameters"
+    ]
+  },
+  {
+    "type": "R",
+    "name": "Repudiation",
+    "name_zh": "抵赖",
+    "description": "Claiming to have not performed an action",
+    "description_zh": "否认执行过的操作",
+    "security_property": "Non-repudiation",
+    "security_property_zh": "不可抵赖性",
+    "examples": [
+      "Denying having performed an action",
+      "Claiming not to have sent a message",
+      "Claiming not to have received a message"
+    ],
+    "examples_zh": [
+      "否认执行过某项操作",
+      "声称未发送消息",
+      "声称未接收消息"
+    ],
+    "automotive_examples": [
+      "Denying vehicle theft attempt",
+      "Claiming not to have modified ECU",
+      "Denying remote access to vehicle"
+    ]
+  },
+  {
+    "type": "I",
+    "name": "Information Disclosure",
+    "name_zh": "信息泄露",
+    "description": "Exposing information to unauthorized parties",
+    "description_zh": "向未授权方泄露信息",
+    "security_property": "Confidentiality",
+    "security_property_zh": "机密性",
+    "examples": [
+      "Exposing data in transit",
+      "Exposing data at rest",
+      "Exposing system information",
+      "Exposing credentials"
+    ],
+    "examples_zh": [
+      "暴露传输中的数据",
+      "暴露存储的数据",
+      "暴露系统信息",
+      "暴露凭证"
+    ],
+    "automotive_examples": [
+      "Leaking driver personal data",
+      "Exposing vehicle location history",
+      "Revealing cryptographic keys",
+      "Disclosing diagnostic codes"
+    ]
+  },
+  {
+    "type": "D",
+    "name": "Denial of Service",
+    "name_zh": "拒绝服务",
+    "description": "Making a system or service unavailable",
+    "description_zh": "使系统或服务不可用",
+    "security_property": "Availability",
+    "security_property_zh": "可用性",
+    "examples": [
+      "Flooding a network",
+      "Crashing a service",
+      "Exhausting resources",
+      "Blocking access"
+    ],
+    "examples_zh": [
+      "网络洪水攻击",
+      "使服务崩溃",
+      "耗尽资源",
+      "阻止访问"
+    ],
+    "automotive_examples": [
+      "CAN bus flooding",
+      "Jamming wireless signals",
+      "Draining vehicle battery",
+      "Blocking OTA updates"
+    ]
+  },
+  {
+    "type": "E",
+    "name": "Elevation of Privilege",
+    "name_zh": "权限提升",
+    "description": "Gaining capabilities without proper authorization",
+    "description_zh": "在未经适当授权的情况下获取能力",
+    "security_property": "Authorization",
+    "security_property_zh": "授权性",
+    "examples": [
+      "Exploiting a vulnerability",
+      "Bypassing access controls",
+      "Gaining admin rights",
+      "Escaping a sandbox"
+    ],
+    "examples_zh": [
+      "利用漏洞",
+      "绕过访问控制",
+      "获取管理员权限",
+      "逃离沙箱"
+    ],
+    "automotive_examples": [
+      "Gaining root access to IVI",
+      "Bypassing secure boot",
+      "Escalating from app to system",
+      "Accessing protected ECU functions"
+    ]
+  }
+]

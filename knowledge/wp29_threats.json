@@ -1,0 +1,137 @@
+[
+  {
+    "code": "4.3.1",
+    "category": "Back-end servers",
+    "subcategory": "Threats relating to back-end servers",
+    "threat_en": "Back-end servers used as a means to attack a vehicle or extract data",
+    "threat_zh": "后端服务器被用作攻击车辆或提取数据的手段",
+    "mitigation_en": "Security controls shall be applied to back-end systems to minimise the risk of attack",
+    "mitigation_zh": "应对后端系统应用安全控制以最大程度降低攻击风险"
+  },
+  {
+    "code": "4.3.2",
+    "category": "Back-end servers",
+    "subcategory": "Threats relating to back-end servers",
+    "threat_en": "Services from back-end server being disrupted, affecting the operation of a vehicle",
+    "threat_zh": "后端服务器服务中断，影响车辆运行",
+    "mitigation_en": "Security controls shall be applied to back-end systems to minimise the risk of service disruption",
+    "mitigation_zh": "应对后端系统应用安全控制以最大程度降低服务中断风险"
+  },
+  {
+    "code": "4.3.3",
+    "category": "Communication channels",
+    "subcategory": "Threats to vehicle communication channels",
+    "threat_en": "Spoofing of messages or data received by the vehicle",
+    "threat_zh": "欺骗车辆接收的消息或数据",
+    "mitigation_en": "The vehicle shall verify the authenticity and integrity of messages it receives",
+    "mitigation_zh": "车辆应验证其接收消息的真实性和完整性"
+  },
+  {
+    "code": "4.3.4",
+    "category": "Communication channels",
+    "subcategory": "Threats to vehicle communication channels",
+    "threat_en": "Communication channels used to conduct unauthorized manipulation of vehicle functions",
+    "threat_zh": "通信渠道被用于对车辆功能进行未经授权的操控",
+    "mitigation_en": "Measures shall be in place to detect and respond to unauthorized manipulation attempts",
+    "mitigation_zh": "应采取措施检测和响应未经授权的操控尝试"
+  },
+  {
+    "code": "4.3.5",
+    "category": "Communication channels",
+    "subcategory": "Threats to vehicle communication channels",
+    "threat_en": "Communication channels enable code to be injected/corrupted",
+    "threat_zh": "通信渠道允许代码被注入/损坏",
+    "mitigation_en": "Secure coding practices and code integrity verification shall be implemented",
+    "mitigation_zh": "应实施安全编码实践和代码完整性验证"
+  },
+  {
+    "code": "4.3.6",
+    "category": "Communication channels",
+    "subcategory": "Threats to vehicle communication channels",
+    "threat_en": "Communication channels allow data/code manipulation or replay",
+    "threat_zh": "通信渠道允许数据/代码操控或重放",
+    "mitigation_en": "Anti-replay mechanisms and data integrity protection shall be implemented",
+    "mitigation_zh": "应实施防重放机制和数据完整性保护"
+  },
+  {
+    "code": "4.3.7",
+    "category": "Update procedures",
+    "subcategory": "Threats relating to update procedures",
+    "threat_en": "Compromise of update procedures to allow unauthorized software updates",
+    "threat_zh": "更新程序被攻陷，允许未经授权的软件更新",
+    "mitigation_en": "Secure update procedures shall be implemented with authentication and integrity verification",
+    "mitigation_zh": "应实施具有认证和完整性验证的安全更新程序"
+  },
+  {
+    "code": "4.3.8",
+    "category": "Update procedures",
+    "subcategory": "Threats relating to update procedures",
+    "threat_en": "Denial of legitimate updates",
+    "threat_zh": "拒绝合法更新",
+    "mitigation_en": "Measures shall ensure that legitimate updates can be performed",
+    "mitigation_zh": "应确保可以执行合法更新的措施"
+  },
+  {
+    "code": "4.3.9",
+    "category": "External connectivity",
+    "subcategory": "Threats relating to unintended human actions",
+    "threat_en": "Unauthorized internet connection as attack route",
+    "threat_zh": "未经授权的互联网连接作为攻击途径",
+    "mitigation_en": "Access control and network segmentation shall be implemented",
+    "mitigation_zh": "应实施访问控制和网络分段"
+  },
+  {
+    "code": "4.3.10",
+    "category": "External connectivity",
+    "subcategory": "Threats relating to external connectivity",
+    "threat_en": "Hosted third-party software as attack route",
+    "threat_zh": "托管的第三方软件作为攻击途径",
+    "mitigation_en": "Third-party software shall be assessed and monitored for security risks",
+    "mitigation_zh": "应评估和监控第三方软件的安全风险"
+  },
+  {
+    "code": "4.3.11",
+    "category": "External connectivity",
+    "subcategory": "Threats relating to external connectivity",
+    "threat_en": "Physical connection used for attack",
+    "threat_zh": "物理连接被用于攻击",
+    "mitigation_en": "Physical interfaces shall be protected against unauthorized access",
+    "mitigation_zh": "物理接口应防止未经授权的访问"
+  },
+  {
+    "code": "4.3.12",
+    "category": "Data/code",
+    "subcategory": "Threats to vehicle data/code",
+    "threat_en": "Extraction of copyright or proprietary software from vehicle systems",
+    "threat_zh": "从车辆系统中提取版权或专有软件",
+    "mitigation_en": "Software protection mechanisms shall be implemented",
+    "mitigation_zh": "应实施软件保护机制"
+  },
+  {
+    "code": "4.3.13",
+    "category": "Data/code",
+    "subcategory": "Threats to vehicle data/code",
+    "threat_en": "Unauthorized access to owner's privacy information",
+    "threat_zh": "未经授权访问车主隐私信息",
+    "mitigation_en": "Data protection and access control mechanisms shall be implemented",
+    "mitigation_zh": "应实施数据保护和访问控制机制"
+  },
+  {
+    "code": "4.3.14",
+    "category": "Data/code",
+    "subcategory": "Threats to vehicle data/code",
+    "threat_en": "Extraction of cryptographic keys",
+    "threat_zh": "提取加密密钥",
+    "mitigation_en": "Cryptographic keys shall be protected using secure storage",
+    "mitigation_zh": "应使用安全存储保护加密密钥"
+  },
+  {
+    "code": "4.3.15",
+    "category": "Data/code",
+    "subcategory": "Threats to vehicle data/code",
+    "threat_en": "Unauthorized modification of vehicle data/parameters",
+    "threat_zh": "未经授权修改车辆数据/参数",
+    "mitigation_en": "Data integrity protection and access control shall be implemented",
+    "mitigation_zh": "应实施数据完整性保护和访问控制"
+  }
+]
