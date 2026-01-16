@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class AssetBase(BaseModel):
@@ -61,6 +61,8 @@ class AssetUpdate(BaseModel):
 class AssetResponse(BaseModel):
     """Schema for asset response."""
 
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     project_id: int
     version_id: Optional[int] = None
@@ -82,9 +84,6 @@ class AssetResponse(BaseModel):
     created_at: datetime
     updated_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
-
 
 class AssetRelationCreate(BaseModel):
     """Schema for creating an asset relation."""
@@ -99,6 +98,8 @@ class AssetRelationCreate(BaseModel):
 class AssetRelationResponse(BaseModel):
     """Schema for asset relation response."""
 
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     project_id: int
     source_asset_id: int
@@ -108,9 +109,6 @@ class AssetRelationResponse(BaseModel):
     description: Optional[str] = None
     source_asset_name: Optional[str] = None
     target_asset_name: Optional[str] = None
-
-    class Config:
-        from_attributes = True
 
 
 class AssetGraphNode(BaseModel):

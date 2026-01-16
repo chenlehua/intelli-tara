@@ -3,11 +3,18 @@
 from functools import lru_cache
 from typing import Optional
 
+from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
+
+    model_config = ConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=True,
+    )
 
     # Application
     APP_NAME: str = "Intelli-TARA"
@@ -61,11 +68,6 @@ class Settings(BaseSettings):
         ".doc", ".docx", ".pdf", ".xlsx", ".xls",
         ".ppt", ".pptx", ".png", ".jpg", ".jpeg"
     ]
-
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = True
 
 
 @lru_cache()

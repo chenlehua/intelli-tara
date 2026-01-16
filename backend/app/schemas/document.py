@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class DocumentCreate(BaseModel):
@@ -27,6 +27,8 @@ class DocumentUpdate(BaseModel):
 class DocumentResponse(BaseModel):
     """Schema for document response."""
 
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     project_id: int
     version_id: Optional[int] = None
@@ -40,9 +42,6 @@ class DocumentResponse(BaseModel):
     uploader_name: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
 
 
 class DocumentParseResult(BaseModel):

@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class UserBase(BaseModel):
@@ -45,6 +45,8 @@ class UserLogin(BaseModel):
 class UserResponse(BaseModel):
     """Schema for user response."""
 
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     username: str
     email: str
@@ -55,23 +57,21 @@ class UserResponse(BaseModel):
     created_at: datetime
     last_login_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
-
 
 class RoleResponse(BaseModel):
     """Schema for role response."""
+
+    model_config = ConfigDict(from_attributes=True)
 
     id: int
     name: str
     description: Optional[str] = None
 
-    class Config:
-        from_attributes = True
-
 
 class PermissionResponse(BaseModel):
     """Schema for permission response."""
+
+    model_config = ConfigDict(from_attributes=True)
 
     id: int
     code: str
@@ -79,6 +79,3 @@ class PermissionResponse(BaseModel):
     description: Optional[str] = None
     resource: Optional[str] = None
     action: Optional[str] = None
-
-    class Config:
-        from_attributes = True

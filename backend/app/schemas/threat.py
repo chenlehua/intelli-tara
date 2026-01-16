@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ThreatBase(BaseModel):
@@ -87,6 +87,8 @@ class MitigationUpdate(BaseModel):
 class MitigationResponse(BaseModel):
     """Schema for mitigation response."""
 
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     threat_id: int
     security_goal: Optional[str] = None
@@ -96,12 +98,11 @@ class MitigationResponse(BaseModel):
     created_at: datetime
     updated_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
-
 
 class ThreatResponse(BaseModel):
     """Schema for threat response."""
+
+    model_config = ConfigDict(from_attributes=True)
 
     id: int
     project_id: int
@@ -148,9 +149,6 @@ class ThreatResponse(BaseModel):
 
     # Mitigations
     mitigations: List[MitigationResponse] = Field(default_factory=list)
-
-    class Config:
-        from_attributes = True
 
 
 class RiskMatrixResponse(BaseModel):

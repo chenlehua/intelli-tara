@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ProjectBase(BaseModel):
@@ -40,6 +40,8 @@ class ProjectConfigUpdate(BaseModel):
 class ProjectResponse(BaseModel):
     """Schema for project response."""
 
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     name: str
     code: Optional[str] = None
@@ -53,12 +55,11 @@ class ProjectResponse(BaseModel):
     threat_count: int = 0
     report_count: int = 0
 
-    class Config:
-        from_attributes = True
-
 
 class ProjectListResponse(BaseModel):
     """Schema for project list response."""
+
+    model_config = ConfigDict(from_attributes=True)
 
     id: int
     name: str
@@ -67,9 +68,6 @@ class ProjectListResponse(BaseModel):
     owner_name: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
 
 
 class ProjectVersionCreate(BaseModel):
@@ -82,6 +80,8 @@ class ProjectVersionCreate(BaseModel):
 class ProjectVersionResponse(BaseModel):
     """Schema for project version response."""
 
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     project_id: int
     version: str
@@ -89,9 +89,6 @@ class ProjectVersionResponse(BaseModel):
     status: str
     created_by: int
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class ProjectMemberAdd(BaseModel):
@@ -104,14 +101,13 @@ class ProjectMemberAdd(BaseModel):
 class ProjectMemberResponse(BaseModel):
     """Schema for project member response."""
 
+    model_config = ConfigDict(from_attributes=True)
+
     user_id: int
     username: str
     display_name: Optional[str] = None
     role: str
     joined_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class ProjectStatsResponse(BaseModel):
