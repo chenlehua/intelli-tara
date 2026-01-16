@@ -1,0 +1,1 @@
+"""Intelli-TARA Backend Application"""
