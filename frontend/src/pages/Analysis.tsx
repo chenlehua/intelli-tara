@@ -1,111 +1,192 @@
 import { useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
-import { ArrowLeftIcon } from '@heroicons/react/24/outline'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import {
+  ArrowLeftIcon,
+  DocumentTextIcon,
+  CubeIcon,
+  ExclamationTriangleIcon,
+  ShareIcon,
+  ChartBarIcon,
+} from '@heroicons/react/24/outline'
+import { projectService } from '@/services/projectService'
+import Tabs from '@/components/common/Tabs'
+import Loading from '@/components/common/Loading'
+import Card from '@/components/common/Card'
+import {
+  DocumentUploader,
+  AssetList,
+  ThreatTable,
+  GraphViewer,
+  RiskMatrix,
+} from '@/components/business'
 
 const tabs = [
-  { key: 'documents', label: '文档管理' },
-  { key: 'assets', label: '资产识别' },
-  { key: 'threats', label: '威胁分析' },
-  { key: 'graph', label: '知识图谱' },
+  { key: 'documents', label: '文档管理', icon: <DocumentTextIcon className="h-4 w-4" /> },
+  { key: 'assets', label: '资产识别', icon: <CubeIcon className="h-4 w-4" /> },
+  { key: 'threats', label: '威胁分析', icon: <ExclamationTriangleIcon className="h-4 w-4" /> },
+  { key: 'graph', label: '知识图谱', icon: <ShareIcon className="h-4 w-4" /> },
+  { key: 'matrix', label: '风险矩阵', icon: <ChartBarIcon className="h-4 w-4" /> },
 ]
 
 export default function Analysis() {
   const { id } = useParams<{ id: string }>()
   const projectId = Number(id)
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('documents')
+
+  const { data: project, isLoading } = useQuery({
+    queryKey: ['project', projectId],
+    queryFn: () => projectService.get(projectId),
+  })
+
+  if (isLoading) {
+    return <Loading fullScreen text="加载项目信息..." />
+  }
+
+  if (!project) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500">项目不存在</p>
+        <button
+          onClick={() => navigate('/projects')}
+          className="mt-4 text-primary-600 hover:text-primary-700"
+        >
+          返回项目列表
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center space-x-4">
-        <Link to={`/projects/${projectId}`} className="text-gray-500 hover:text-gray-700">
-          <ArrowLeftIcon className="h-5 w-5" />
-        </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">TARA 分析工作台</h1>
-          <p className="mt-1 text-sm text-gray-500">执行威胁分析与风险评估</p>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <Link
+            to={`/projects/${projectId}`}
+            className="text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            <ArrowLeftIcon className="h-5 w-5" />
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">TARA 分析工作台</h1>
+            <p className="mt-1 text-sm text-gray-500">
+              {project.name} {project.code && `(${project.code})`}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-4">
+          <span
+            className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+              project.status === 'completed'
+                ? 'bg-green-100 text-green-800'
+                : project.status === 'analyzing'
+                ? 'bg-blue-100 text-blue-800'
+                : 'bg-gray-100 text-gray-800'
+            }`}
+          >
+            {project.status === 'draft'
+              ? '草稿'
+              : project.status === 'analyzing'
+              ? '分析中'
+              : project.status === 'completed'
+              ? '已完成'
+              : project.status}
+          </span>
+        </div>
+      </div>
+
+      {/* Progress indicator */}
+      <div className="bg-white rounded-lg shadow p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-8">
+            <ProgressStep
+              number={1}
+              label="上传文档"
+              active={activeTab === 'documents'}
+              completed={true}
+            />
+            <ProgressStep
+              number={2}
+              label="识别资产"
+              active={activeTab === 'assets'}
+              completed={false}
+            />
+            <ProgressStep
+              number={3}
+              label="威胁分析"
+              active={activeTab === 'threats'}
+              completed={false}
+            />
+            <ProgressStep
+              number={4}
+              label="风险评估"
+              active={activeTab === 'matrix'}
+              completed={false}
+            />
+          </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === tab.key
-                  ? 'border-primary-500 text-primary-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
-      </div>
+      <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
 
       {/* Tab content */}
-      <div className="bg-white shadow rounded-lg p-6">
+      <Card padding="lg">
         {activeTab === 'documents' && (
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">文档管理</h3>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
-              <p className="text-gray-500">拖拽文件到此处或点击上传</p>
-              <p className="mt-2 text-sm text-gray-400">
-                支持 PDF, Word, Excel, PPT, 图片等格式
-              </p>
-              <button className="mt-4 px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700">
-                选择文件
-              </button>
-            </div>
-          </div>
+          <DocumentUploader projectId={projectId} />
         )}
 
         {activeTab === 'assets' && (
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900">资产列表</h3>
-              <div className="space-x-2">
-                <button className="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-                  导入资产
-                </button>
-                <button className="px-3 py-1.5 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700">
-                  AI 识别
-                </button>
-              </div>
-            </div>
-            <div className="text-center py-12 text-gray-500">
-              暂无资产数据，请先上传文档并执行 AI 识别
-            </div>
-          </div>
+          <AssetList projectId={projectId} />
         )}
 
         {activeTab === 'threats' && (
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-gray-900">威胁分析</h3>
-              <div className="space-x-2">
-                <button className="px-3 py-1.5 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700">
-                  AI 分析
-                </button>
-              </div>
-            </div>
-            <div className="text-center py-12 text-gray-500">
-              暂无威胁数据，请先完成资产识别后执行威胁分析
-            </div>
-          </div>
+          <ThreatTable projectId={projectId} />
         )}
 
         {activeTab === 'graph' && (
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">知识图谱</h3>
-            <div className="h-96 border border-gray-200 rounded-lg flex items-center justify-center text-gray-500">
-              资产关系图谱将在此显示
-            </div>
-          </div>
+          <GraphViewer projectId={projectId} />
         )}
+
+        {activeTab === 'matrix' && (
+          <RiskMatrix projectId={projectId} />
+        )}
+      </Card>
+    </div>
+  )
+}
+
+interface ProgressStepProps {
+  number: number
+  label: string
+  active: boolean
+  completed: boolean
+}
+
+function ProgressStep({ number, label, active, completed }: ProgressStepProps) {
+  return (
+    <div className="flex items-center">
+      <div
+        className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${
+          active
+            ? 'bg-primary-600 text-white'
+            : completed
+            ? 'bg-green-500 text-white'
+            : 'bg-gray-200 text-gray-600'
+        }`}
+      >
+        {completed && !active ? '✓' : number}
       </div>
+      <span
+        className={`ml-2 text-sm ${
+          active ? 'text-primary-600 font-medium' : 'text-gray-500'
+        }`}
+      >
+        {label}
+      </span>
     </div>
   )
 }

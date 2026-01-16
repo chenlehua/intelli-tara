@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ToastProvider } from '@/components/common/Toast'
 import Layout from '@/components/common/Layout'
 import Login from '@/pages/Login'
 import Dashboard from '@/pages/Dashboard'
@@ -13,8 +14,9 @@ import { useAuthStore } from '@/stores/authStore'
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
       retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false,
     },
   },
 })
@@ -27,26 +29,28 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route
-            path="/"
-            element={
-              <PrivateRoute>
-                <Layout />
-              </PrivateRoute>
-            }
-          >
-            <Route index element={<Dashboard />} />
-            <Route path="projects" element={<Projects />} />
-            <Route path="projects/:id" element={<ProjectDetail />} />
-            <Route path="projects/:id/analysis" element={<Analysis />} />
-            <Route path="reports" element={<Reports />} />
-            <Route path="settings" element={<Settings />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <ToastProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/"
+              element={
+                <PrivateRoute>
+                  <Layout />
+                </PrivateRoute>
+              }
+            >
+              <Route index element={<Dashboard />} />
+              <Route path="projects" element={<Projects />} />
+              <Route path="projects/:id" element={<ProjectDetail />} />
+              <Route path="projects/:id/analysis" element={<Analysis />} />
+              <Route path="reports" element={<Reports />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </ToastProvider>
     </QueryClientProvider>
   )
 }

@@ -13,6 +13,7 @@ export interface Project {
   asset_count?: number
   threat_count?: number
   report_count?: number
+  document_count?: number
 }
 
 export interface ProjectCreate {

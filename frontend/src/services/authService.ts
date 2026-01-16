@@ -50,4 +50,14 @@ export const authService = {
     const response = await api.post('/auth/refresh', { refresh_token: refreshToken })
     return response.data
   },
+
+  changePassword: async (data: { current_password: string; new_password: string }) => {
+    const response = await api.post('/auth/change-password', data)
+    return response.data
+  },
+
+  updateProfile: async (data: { display_name?: string; email?: string }) => {
+    const response = await api.put('/auth/profile', data)
+    return response.data
+  },
 }
