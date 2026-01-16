@@ -153,7 +153,7 @@ docker-compose logs -f backend
 | Nginx (HTTP) | 80 |
 | Nginx (HTTPS) | 443 |
 | Backend API | 8000 |
-| MySQL | 3306 |
+| MySQL | 3307 |
 | Redis | 6379 |
 | Neo4j | 7687 |
 | Elasticsearch | 9200 |

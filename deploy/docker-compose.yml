@@ -39,7 +39,7 @@ services:
     expose:
       - "8000"
     environment:
-      - DATABASE_URL=${DATABASE_URL:-mysql+aiomysql://root:password@mysql:3306/intelli_tara}
+      - DATABASE_URL=${DATABASE_URL:-mysql+aiomysql://root:password@mysql:3307/intelli_tara}
       - REDIS_HOST=${REDIS_HOST:-redis}
       - REDIS_PORT=${REDIS_PORT:-6379}
       - NEO4J_URI=${NEO4J_URI:-bolt://neo4j:7687}

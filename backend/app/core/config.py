@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str = "/api/v1"
 
     # Database
-    DATABASE_URL: str = "mysql+asyncmy://tara:tarapass@localhost:3306/tara"
+    DATABASE_URL: str = "mysql+asyncmy://tara:tarapass@localhost:3307/tara"
     DATABASE_POOL_SIZE: int = 20
     DATABASE_MAX_OVERFLOW: int = 10
 

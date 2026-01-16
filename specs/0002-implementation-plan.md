@@ -280,7 +280,7 @@ services:
   mysql:
     image: mysql:8.0
     ports:
-      - "3306:3306"
+      - "3307:3306"
     environment:
       MYSQL_ROOT_PASSWORD: rootpass
       MYSQL_DATABASE: tara
@@ -2132,7 +2132,7 @@ APP_NAME=Intelli-TARA
 DEBUG=false
 
 # 数据库
-DATABASE_URL=mysql+asyncmy://user:pass@localhost:3306/tara
+DATABASE_URL=mysql+asyncmy://user:pass@localhost:3307/tara
 
 # Redis
 REDIS_URL=redis://localhost:6379/0

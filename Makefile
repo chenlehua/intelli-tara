@@ -50,10 +50,10 @@ backend-test:
 
 # Database
 db-up:
-	docker-compose -f deploy/docker-compose.dev.yml up -d
+	docker compose -f deploy/docker-compose.dev.yml up -d
 
 db-down:
-	docker-compose -f deploy/docker-compose.dev.yml down
+	docker compose -f deploy/docker-compose.dev.yml down
 
 migrate:
 	cd backend && uv run alembic upgrade head
@@ -63,7 +63,7 @@ migrate-create:
 
 # Deploy
 deploy:
-	docker-compose -f deploy/docker-compose.yml up -d --build
+	docker compose -f deploy/docker-compose.yml up -d --build
 
 # Clean
 clean:
