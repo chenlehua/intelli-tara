@@ -29,6 +29,16 @@ class ParsedContent:
 class BaseParser(ABC):
     """Abstract base class for document parsers."""
 
+    @property
+    @abstractmethod
+    def supported_extensions(self) -> List[str]:
+        """Return list of supported file extensions.
+        
+        Returns:
+            List of supported file extensions (e.g., ['pdf'], ['docx', 'doc'])
+        """
+        pass
+
     @abstractmethod
     async def parse(self, file_path: str) -> ParsedContent:
         """Parse a document file.
@@ -41,7 +51,6 @@ class BaseParser(ABC):
         """
         pass
 
-    @abstractmethod
     def supports(self, file_type: str) -> bool:
         """Check if this parser supports the given file type.
         
@@ -51,7 +60,7 @@ class BaseParser(ABC):
         Returns:
             True if supported, False otherwise
         """
-        pass
+        return file_type.lower() in self.supported_extensions
 
 
 class ParserFactory:
@@ -85,6 +94,14 @@ class ParserFactory:
         """Get list of all supported file types."""
         types = set()
         for parser in cls._parsers:
-            # Each parser should define its supported types
-            pass
+            types.update(parser.supported_extensions)
         return list(types)
+
+    @classmethod
+    def get_supported_extensions(cls) -> List[str]:
+        """Get list of all supported extensions.
+        
+        Returns:
+            List of all supported file extensions
+        """
+        return cls.supported_types()

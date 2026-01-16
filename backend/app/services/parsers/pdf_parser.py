@@ -11,11 +11,10 @@ from app.services.parsers.base import BaseParser, ParsedContent
 class PDFParser(BaseParser):
     """Parser for PDF documents."""
 
-    SUPPORTED_TYPES = ['pdf']
-
-    def supports(self, file_type: str) -> bool:
-        """Check if this parser supports the given file type."""
-        return file_type.lower() in self.SUPPORTED_TYPES
+    @property
+    def supported_extensions(self) -> list[str]:
+        """Return list of supported file extensions."""
+        return ['pdf']
 
     async def parse(self, file_path: str) -> ParsedContent:
         """Parse a PDF document.

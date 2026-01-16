@@ -12,11 +12,10 @@ from app.services.parsers.base import BaseParser, ParsedContent
 class ImageParser(BaseParser):
     """Parser for image files using OCR and visual understanding."""
 
-    SUPPORTED_TYPES = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp']
-
-    def supports(self, file_type: str) -> bool:
-        """Check if this parser supports the given file type."""
-        return file_type.lower() in self.SUPPORTED_TYPES
+    @property
+    def supported_extensions(self) -> list[str]:
+        """Return list of supported file extensions."""
+        return ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp']
 
     async def parse(self, file_path: str) -> ParsedContent:
         """Parse an image file.
